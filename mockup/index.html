@@ -1,0 +1,168 @@
+<html ng-app="MemeGeneratorPage">
+  <head>
+    <title>Meme Generator</title>
+
+    <link href="/bower_components/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+    <link href="/bower_components/bootstrap-select/bootstrap-select.css" rel="stylesheet">
+    <link href="/css/bootstrap-paper.css" rel="stylesheet">
+
+    <link href="/bower_components/selectize/dist/css/selectize.bootstrap3.css" rel="stylesheet">
+    <link href="/bower_components/hopscotch/dist/css/hopscotch.css" rel="stylesheet">
+    <link href="/bower_components/highlightjs/styles/default.css" rel="stylesheet">
+    <link href="/bower_components/filedrop/filedrop.css" rel="stylesheet">
+
+    <link href="/css/abn_tree.css" rel="stylesheet">
+    <link href="/css/footer.css" rel="stylesheet">
+    <link href="/css/login.css" rel="stylesheet">
+    <link href="/css/stylesheet.css" rel="stylesheet">
+
+    <!-- Adjust scale for mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- set options before less.js script -->
+    <script>
+      less = {
+      env: "development"
+      };
+    </script>
+    <script src="/bower_components/less/dist/less-1.7.5.min.js" type="text/javascript"></script>
+
+    <script type="text/javascript" src="/bower_components/jquery/dist/jquery.js">
+    </script>
+
+    <script src="/js/errorlogging.js"></script>
+
+    <script src="/bower_components/angular/angular.js">
+    </script>
+    <script src="/bower_components/angular-animate/angular-animate.js">
+    </script>
+    <script src="/bower_components/angular-route/angular-route.js">
+    </script>
+    <script src="/otherjs/angular-bootstrap-nav-tree/dist/abn_tree_directive.js">
+    </script>
+    <script src="/bower_components/angular-error-shipper/dist/angular-error-shipper.js">
+    </script>
+    <script src="/bower_components/angular-scroll-glue/src/scrollglue.js">
+    </script>
+
+    <script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.js">
+    </script>
+
+    <script type="text/javascript" src="/bower_components/sifter/sifter.js">
+    </script>
+    <script type="text/javascript" src="/bower_components/microplugin/src/microplugin.js">
+    </script>
+    <script type="text/javascript" src="/bower_components/selectize/dist/js/selectize.js">
+    </script>
+    <script type="text/javascript" src="/bower_components/bootstrap/dist/js/bootstrap.js">
+    </script>
+    <script type="text/javascript" src="/bower_components/lodash/dist/lodash.js">
+    </script>
+    <script type="text/javascript" src="/bower_components/bootstrap-select/bootstrap-select.js">
+    </script>
+    <script type="text/javascript" src="/bower_components/momentjs/moment.js">
+    </script>
+    <script type="text/javascript" src="/bower_components/stacktrace-js/dist/stacktrace.js">
+    </script>
+
+    <script type="text/javascript" src="/bower_components/filedrop/filedrop.js">
+    </script>
+
+    <script type="text/javascript" src="/bower_components/google-diff-match-patch-js/diff_match_patch_uncompressed.js">
+    </script>
+    <script type="text/javascript" src="/bower_components/FileSaver/FileSaver.js">
+    </script>
+
+    <script type="text/javascript" src="/bower_components/gremlins.js/gremlins.min.js">
+    </script>
+
+    <script type="text/javascript" src="/bower_components/highlightjs/highlight.pack.js"></script>
+    <script type="text/javascript" src="/bower_components/marked/lib/marked.js">
+    </script>
+    <script type="text/javascript" src="/bower_components/validator-js/validator.js"></script>
+    <script type="text/javascript" src="/bower_components/hopscotch/dist/js/hopscotch.min.js">
+    </script>
+
+    <script type="text/javascript">
+      hljs.initHighlightingOnLoad();
+      // Synchronous highlighting with highlight.js
+      marked.setOptions({
+      highlight: function (code) {
+      return hljs.highlightAuto(code).value;
+      }
+      });
+    </script>
+
+    <script type="text/javascript" src="/bower_components/Autolinker.js/dist/Autolinker.js"></script>
+    <script type="text/javascript" src="/bower_components/bower-webfontloader/webfont.js"></script>
+
+    <script type="text/javascript" src="/js/app.js"></script>
+    <script type="text/javascript" src="/js/exceptionhandler.js"></script>
+    <script type="text/javascript" src="/js/alert.js"></script>
+    <script type="text/javascript" src="/js/navbar.js"></script>
+    <script type="text/javascript" src="/js/retry.js"></script>
+    <script type="text/javascript" src="/js/gallery.js"></script>
+  </head>
+  <body ng-cloak>
+    <div
+       id="navbar-placeholder"
+       class="navbar navbar-default navbar-fixed-top"
+       role="navigation"
+       ng-controller="NavbarController">
+
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#/">{{projectName}}</a>
+      </div>
+      <div class="collapse navbar-collapse navbar-right">
+        <ul class="nav navbar-nav">
+          <li><a href="#/usermemes/{{myself._id}}">{{myself.fullName}}</a></li>
+          <li style="padding-right:50px">
+            <a href="#/logout" ng-if="myself">Log Out</a>
+            <a href="#/login" ng-if="!myself">Log In</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div
+       class="alert-container"
+       ng-controller="AlertController">
+      <div class="row" ng-repeat="alert in alerts">
+        <div
+           ng-class="['alert','alert-'+alert.level,'col-xs-12 col-sm-8 col-sm-offset-2']"
+           style="text-align: center;"
+           role="alert">
+          <span ng-bind-html="alert.message"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="col-md-2">
+        <div>
+          <ul class="nav nav-pills nav-stacked">
+            <li role="presentation"><a href="#/creatememe">Create Meme</a></li>
+            <li role="presentation" class="active"><a href="#/recent">Most Recent</a></li>
+            <li role="presentation"><a href="#/top/weekly">Top Weekly</a></li>
+            <li role="presentation"><a href="#/top/alltime">All-Star</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-md-10">
+        <div ng-view>
+        </div>
+      </div>
+    </div>
+
+    <div id="footer">
+      <p class="text-muted">Powered by <a href="https://github.com/MisterTea/MemeGenerator">MemeGenerator</a></p>
+    </div>
+</body>
+</html>

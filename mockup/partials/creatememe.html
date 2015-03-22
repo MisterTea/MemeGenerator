@@ -1,0 +1,86 @@
+<div>
+  <div class="col-md-6">
+    <memedetail info="meme"></memedetail>
+  </div>
+  <div class="col-md-6">
+    <form class="form-horizontal">
+      <div class="form-group">
+        <label for="memeSelect" class="col-sm-4 control-label">Template</label>
+        <div class="col-sm-8">
+          <select id="memeSelect" class="form-control" ng-model="templateSelected">
+            <option ng-repeat="template in templates" id="{{template._id}}">{{template.name}}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="contextInput" class="col-sm-4 control-label">Top</label>
+        <div class="col-sm-8">
+          <textarea class="form-control" rows="3" ng-model="topContent"></textarea>
+        </div>
+        <label for="contextInput" class="col-sm-4 control-label">&nbsp;</label>
+        <div class="col-sm-8" style="text-align: center;">
+          <button type="button" ng-class="getAlignClass('top','left')" ng-click="setAlign('top','left')">
+            <span class="glyphicon glyphicon-align-left"></span>
+          </button>
+          <button type="button" ng-class="getAlignClass('top','center')" ng-click="setAlign('top','center')">
+            <span class="glyphicon glyphicon-align-center"></span>
+          </button>
+          <button type="button" ng-class="getAlignClass('top','right')" ng-click="setAlign('top','right')">
+            <span class="glyphicon glyphicon-align-right"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="contextInput" class="col-sm-4 control-label">Middle</label>
+        <div class="col-sm-8">
+          <textarea class="form-control" rows="3" ng-model="middleContent"></textarea>
+        </div>
+        <label for="contextInput" class="col-sm-4 control-label">&nbsp;</label>
+        <div class="col-sm-8" style="text-align: center;">
+          <button type="button" ng-class="getAlignClass('middle','left')" ng-click="setAlign('middle','left')">
+            <span class="glyphicon glyphicon-align-left"></span>
+          </button>
+          <button type="button" ng-class="getAlignClass('middle','center')" ng-click="setAlign('middle','center')">
+            <span class="glyphicon glyphicon-align-center"></span>
+          </button>
+          <button type="button" ng-class="getAlignClass('middle','right')" ng-click="setAlign('middle','right')">
+            <span class="glyphicon glyphicon-align-right"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="contextInput" class="col-sm-4 control-label">Bottom</label>
+        <div class="col-sm-8">
+          <textarea class="form-control" rows="3" ng-model="bottomContent"></textarea>
+        </div>
+        <label for="contextInput" class="col-sm-4 control-label">&nbsp;</label>
+        <div class="col-sm-8" style="text-align: center;">
+          <button type="button" ng-class="getAlignClass('bottom','left')" ng-click="setAlign('bottom','left')">
+            <span class="glyphicon glyphicon-align-left"></span>
+          </button>
+          <button type="button" ng-class="getAlignClass('bottom','center')" ng-click="setAlign('bottom','center')">
+            <span class="glyphicon glyphicon-align-center"></span>
+          </button>
+          <button type="button" ng-class="getAlignClass('bottom','right')" ng-click="setAlign('bottom','right')">
+            <span class="glyphicon glyphicon-align-right"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="contextInput" class="col-sm-4 control-label">Context</label>
+        <div class="col-sm-8">
+          <input type="text" class="form-control" id="contextInput" placeholder="URL with context">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-offset-4 col-sm-8">
+          <button type="submit" class="btn btn-default">Create Meme</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,56 @@
+<div>
+  <div class="col-md-6">
+    <memedetail info="meme"></memedetail>
+    <div style="float:left; padding: 2px 0px;">
+      <strong>{{meme.creator | usernameFromId}}</strong>
+    </div>
+    <div style="float: right; padding: 2px 5px;">
+      <a href="#" ng-click="copyLink('/gallery.html#/meme/'+meme._id)" style="text-decoration: none;">
+        <span class="glyphicon glyphicon-copy" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
+      </a>
+      <a href="#" ng-click="copyLink('/gallery.html#/meme/'+meme._id)" style="text-decoration: none;">
+        <span class="glyphicon glyphicon-link" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
+      </a>
+    </div>
+    <div ng-style="{'float':'right', 'background-color':voteColor(meme._id), 'color':'white', 'border-radius': '15px',  'padding': '2px 5px'}">
+      <a href="" ng-click="vote(meme._id, false)" style="text-decoration: none;">
+        <span class="glyphicon glyphicon-minus" ng-style="{'color': 'white', 'padding' : '0px 2px'}" aria-label="votedown"></span>
+      </a>
+      <strong ng-style="{'color': 'white', 'padding' : '0px 2px', 'width':'30px'}">{{meme.votes}}</strong>
+      <a href="" ng-click="vote(meme._id, true)" style="text-decoration: none;">
+        <span class="glyphicon glyphicon-plus" ng-style="{'color': 'white', 'padding' : '0px 2px'}" aria-label="voteup"></span>
+      </a>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="panel panel-primary">
+      <div class="panel-body" scroll-glue>
+        <ul class="chat">
+          <li class="left clearfix" ng-repeat="chat in chats">
+            <div class="chat-body clearfix">
+              <div class="header">
+                <strong class="primary-font">{{chat.author | usernameFromId}}</strong>
+                <small class="pull-right text-muted" style="margin: 0px 0px;">
+                  <span class="glyphicon glyphicon-time"></span>{{chat.timestamp | relativeTime}}
+                </small>
+              </div>
+              <p>
+                <span ng-bind-html="chat.message | linkify"></span>
+              </p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="panel-footer">
+        <div class="input-group">
+          <input id="btn-input" type="text" class="form-control input" placeholder="Type your message here...">
+          <span class="input-group-btn">
+            <button class="btn btn-primary" id="btn-chat">
+              Send</button>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
