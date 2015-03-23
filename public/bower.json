@@ -1,0 +1,55 @@
+{
+  "name": "Meme Generator",
+  "description": "Make memes and share them with the people you love (and some people you don't)",
+  "version": "0.0.0",
+  "homepage": "https://github.com/MisterTea/MemeGenerator",
+  "authors": [
+    "Jason Gauci <jgmath2000@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.3",
+    "google-diff-match-patch-js": "~1.0.0",
+    "elasticsearch": "~2.1.3",
+    "bootstrap-select": "~1.5.2",
+    "selectize": "~0.9.0",
+    "momentjs": "~2.6.0",
+    "marked": "~0.3.2",
+    "less": "~1.7.5",
+    "bootstrap": "~3.3.0",
+    "microplugin": "~0.0.3",
+    "sifter": "~0.3.4",
+    "normalize.css": "~3.0.2",
+    "fuzzy.js": "*",
+    "angular": "~1.3.10",
+    "angular-route": "~1.3.10",
+    "angular-animate": "~1.3.10",
+    "angular-bootstrap": "~0.12.0",
+    "FileSaver": "*",
+    "highlightjs": "~8.3.0",
+    "jspdf": "~1.0.272",
+    "lodash": "~2.4.1",
+    "angular-bootstrap-show-errors": "~2.0.0",
+    "angular-error-shipper": "~0.1.3",
+    "shepherd.js": "~0.5.1",
+    "intro.js": "~1.0.0",
+    "validator-js": "~3.22.1",
+    "hopscotch": "~0.2.2",
+    "gremlins.js": "~0.1.0",
+    "stacktrace-js": "~0.6.4",
+    "filedrop": "*",
+    "Autolinker.js": "~0.15.2",
+    "bower-webfontloader": "~1.5.13",
+    "angular-scroll-glue": "~2.0.4"
+  },
+  "resolutions": {
+    "angular": "~1.3.10"
+  }
+}

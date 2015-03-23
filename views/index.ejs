@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="MemeGenerator">
+  <% include headerdebug %>
+
+  <body ng-cloak>
+    <script type="text/javascript">
+      // Server-side variables
+      server = <%- JSON.stringify(server) %>
+    </script>
+
+    <% include navbar %>
+
+    <% include alert %>
+
+    <div class="container main-row">
+      <div class="col-md-2">
+        <% include sidebar %>
+      </div>
+
+      <div class="col-md-10">
+        <div ng-view>
+        </div>
+      </div>
+    </div>
+
+    <% include footer %>
+  </body>
+</html>

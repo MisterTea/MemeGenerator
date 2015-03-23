@@ -1,0 +1,37 @@
+{
+  "logging":{
+    "level":"debug",
+    "file":"./outputlog.json"
+  },
+  "database":{
+    "debug":true,
+    "uri":"mongodb://localhost/memegenerator",
+    "saveMediaToDb":true
+  },
+  "elasticsearch":{
+    "enable":false,
+    "host":"localhost:9200",
+    "loglevel":"warning"
+  },
+  "serverName":"Tidal Wave",
+  "auth":"plain",
+  "hostname":"memegenerator.com",
+  "port":null,
+  "email" : {
+    "serverEmailAddress":"memegenerator-mailer@memegenerator.com",
+    "transport":"direct",
+    "options":{}
+  },
+  "ldap":{
+    "server":"ldaps://myldapserver:636",
+    "userField":"uid",
+    "bindDN":"cn=users,dc=com"
+  },
+  "ssl":false,
+  "sessionSecret":"t1d4lw4ve",
+  "credentials": {
+    "certificateFile":"mycert.pem",
+    "privateKeyFile":"keystore.pem",
+    "passphrase":"myPassphrase"
+  }
+}
