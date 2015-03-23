@@ -1,7 +1,6 @@
 var fs = require('fs');
 
 var express = require('express');
-var Hierarchy = require('../server/hierarchy');
 var AuthHelper = require('../server/auth-helper');
 var _ = require('lodash');
 var options = require('../server/options-handler').options;
@@ -23,7 +22,7 @@ RegExp.escape = function(s) {
     return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 };
 
-router.post(
+router.get(
   '/me',
   function(req, res) {
     if (req.isAuthenticated()) {

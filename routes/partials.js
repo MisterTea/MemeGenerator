@@ -1,5 +1,4 @@
 var express = require('express');
-var Hierarchy = require('../server/hierarchy');
 var AuthHelper = require('../server/auth-helper');
 var options = require('../server/options-handler').options;
 var log = require('../server/logger').log;

@@ -3,7 +3,7 @@ app.service('dataCache', ['retryHttp', '$log', function(retryHttp, $log) {
   var cached = {};
   var fetch = {
     'myself':function(callback) {
-      retryHttp.get('/service/myself', function(result) {
+      retryHttp.get('/service/me', function(result) {
         callback(result);
       });
     }

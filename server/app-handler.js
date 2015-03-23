@@ -76,11 +76,8 @@ exports.init = function() {
     }
   });
   app.use('/view', require('../routes/index'));
-  app.use('/profile',require('../routes/profile'));
   app.use('/partials',require('../routes/partials'));
   app.use('/service',require('../routes/services'));
-
-  require('./sharejs-handler').init(app);
 
   // catch 404 and forward to error handler
   app.use(function(req, res, next) {
