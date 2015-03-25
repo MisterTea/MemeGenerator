@@ -55,6 +55,7 @@ router.post(
         if (err) {
           log.error({error:err});
           res.status(500).end();
+          return;
         }
         res.status(200).end();
       });
