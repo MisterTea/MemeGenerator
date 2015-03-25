@@ -40,6 +40,20 @@ var isObjectIdArray = function(n) {
   return true;
 };
 
+var TemplateSchema = mongoose.Schema({
+  creatorId: {type:ObjectId, index:true, validate:isObjectId},
+  name: {type:String, index:true, required:true},
+  imageId: {type:ObjectId, required:true, validate:isObjectId}
+});
+exports.Template = mongoose.model("Template",TemplateSchema);
+
+var ImageSchema = mongoose.Schema({
+  data: {type:Buffer, required:true},
+  mime: {type:String, required:true},
+  filename: {type:String, required:true}
+});
+exports.Image = mongoose.model("Image",ImageSchema);
+
 var MemeSchema = new mongoose.Schema({
   creatorId: {type:ObjectId, index:true, required:true, validate:isObjectId},
   imageId: {type:ObjectId, index:true, required:true, validate:isObjectId},
@@ -86,24 +100,6 @@ var GroupSchema = mongoose.Schema({
   fromLdap: {type:Boolean, required:true}
 });
 exports.Group = mongoose.model("Group",GroupSchema);
-
-var ImageSchema = mongoose.Schema({
-  data: {type:Buffer, required:true},
-  base64: {type:String, required:true},
-  mime: {type:String, required:true, index:true},
-  name: {type:String, required:true, unique:true, index:true},
-  filename: {type:String, required:true, index:true}
-});
-exports.Image = mongoose.model("Image",ImageSchema);
-
-var FileDataSchema = mongoose.Schema({
-  data: {type:Buffer, required:true},
-  base64: {type:String, required:true},
-  mime: {type:String, required:true, index:true},
-  name: {type:String, required:true, unique:true, index:true},
-  filename: {type:String, required:true, index:true}
-});
-exports.FileData = mongoose.model("FileData",FileDataSchema);
 
 var AngularErrorSchema = mongoose.Schema({
   message: String,

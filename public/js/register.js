@@ -47,7 +47,7 @@ app.directive('registeremail', function($q, $http) {
   };
 });
 
-app.controller('RegisterController', ['$scope', '$http', '$timeout', 'pageStateService', function($scope, $http, $timeout, pageStateService) {
+app.controller('RegisterController', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
   $scope.user = {
     email:"",
     fullName:"",

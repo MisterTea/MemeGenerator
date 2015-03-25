@@ -1,6 +1,6 @@
 <div>
   <div class="col-md-6">
-    <memedetail info="meme"></memedetail>
+    <!-- <memedetail info="meme"></memedetail> -->
     <div style="float:left; padding: 2px 0px;">
       <strong>{{meme.creator | usernameFromId}}</strong>
     </div>
@@ -31,7 +31,7 @@
               <div class="header">
                 <strong class="primary-font">{{chat.author | usernameFromId}}</strong>
                 <small class="pull-right text-muted" style="margin: 0px 0px;">
-                  <span class="glyphicon glyphicon-time"></span>{{chat.timestamp | relativeTime}}
+                  <span class="glyphicon glyphicon-time"></span><span relative-time="{{chat.timestamp}}"></span>
                 </small>
               </div>
               <p>

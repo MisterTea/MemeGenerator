@@ -2,5 +2,5 @@ app.controller('NavbarController', ['$scope', '$rootScope', 'retryHttp', '$modal
   dataCache.get('myself', function(myself) {
     $scope.myself = myself;
   });
-  $scope.projectName = "Tidal Wave";
+  $scope.projectName = "Meme Generator";
 }]);

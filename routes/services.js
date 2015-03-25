@@ -9,11 +9,11 @@ var SearchHandler = require('../server/search-handler');
 var log = require('../server/logger').log;
 
 var model = require('../server/model');
+var Image = model.Image;
 var Meme = model.Meme;
 var User = model.User;
 var Group = model.Group;
-var Image = model.Image;
-var FileData = model.FileData;
+var Template = model.Template;
 var AngularError = model.AngularError;
 
 var router = express.Router();
@@ -294,155 +294,70 @@ router.post(
 var chance = new require('chance')();
 
 router.post(
-  '/saveImage',
+  '/createTemplate',
   AuthHelper.ensureAuthenticated,
   function(req,res) {
-    console.log("SAVING IMAGE");
-    var imageData = req.body;
+    console.log("SAVING TEMPLATE");
+    var rawTemplate = req.body;
 
-    var uniqueName =
-          chance.string({length: 8, pool:"1234567890abcdef"}) + "_" +
-          imageData.name;
+    if (!rawTemplate.name ||
+        !rawTemplate.base64 ||
+        !rawTemplate.mime ||
+        !rawTemplate.imageFilename) {
+      res.status(500).end();
+      return;
+    }
 
+    // Start by saving the image
     var image = new Image({
-      base64:imageData.base64,
-      data:new Buffer(imageData.base64, 'base64'),
-      mime:imageData.mime,
-      name:uniqueName,
-      filename:imageData.name});
+      data: new Buffer(rawTemplate.base64, 'base64'),
+      mime: rawTemplate.mime,
+      filename: rawTemplate.imageFilename
+    });
 
-    if (options.database.saveMediaToDb) {
-      image.save(function (err) {
+    image.save(function (err, innerImage) {
+      if (err) {
+        res.status(500).end();
+        return;
+      }
+
+      var template = new Template({
+        creatorId:req.user._id,
+        name:rawTemplate.name,
+        imageId:innerImage._id
+      });
+
+      template.save(function (err, innerTemplate) {
         if (err) {
           res.status(500).end();
           return;
         }
-        res.status(200).type("text/plain").send(uniqueName);
+        res.status(200).type("application/json").send(JSON.stringify(innerTemplate));
       });
-    } else {
-      fs.writeFile('usermedia/'+uniqueName, JSON.stringify(image), function(err) {
-        if (err) {
-          res.status(500).end();
-          return;
-        }
-        res.status(200).type("text/plain").send(uniqueName);
-      });
-    }
+    });
   });
 
 router.get(
-  '/getImage/:name',
+  '/getTemplate/:id',
   function(req,res) {
-    var name = req.param('name');
-    console.log("Getting image with name " + name);
+    var id = req.param('id');
+    console.log("Getting image with id " + id);
 
-    if (options.database.saveMediaToDb) {
-      Image.find({name:name}, function(err,results) {
-        if (results.length>1) {
-          res.status(500).end();
-        } else if(results.length==0) {
-          res.status(404).end();
-        }
-        var image = results[0];
-        res.setHeader('Content-disposition', 'attachment; filename='+image.filename);
-        res.status(200).type(image.mime).send(image.data);
-      });
-    } else {
-      var path = 'usermedia/'+name;
-      fs.exists(path, function(exists) {
-        if (!exists) {
-          res.status(404).end();
-          return;
-        }
-        fs.readFile(path, function(err, data) {
-          if (err) {
-            res.status(500).end();
-            return;
-          }
-          var image = JSON.parse(data);
-          // Note that image.data didn't survive going to JSON and back.
-          res.setHeader('Content-disposition', 'attachment; filename='+image.filename);
-          res.status(200).type(image.mime).send(new Buffer(image.base64, 'base64'));
-        });
-      });
-    }
-  });
-
-router.post(
-  '/saveFile',
-  AuthHelper.ensureAuthenticated,
-  function(req,res) {
-    console.log("SAVING FILE");
-    var fileDataJson = req.body;
-
-    var uniqueName =
-          chance.string({length: 8, pool:"1234567890abcdef"}) + "_" +
-          fileDataJson.name;
-
-    var fileData = new FileData({
-      base64:fileDataJson.base64,
-      data:new Buffer(fileDataJson.base64, 'base64'),
-      mime:fileDataJson.mime,
-      name:uniqueName,
-      filename:fileDataJson.name});
-
-    if (options.database.saveMediaToDb) {
-      fileData.save(function (err) {
-        if (err) {
-          console.dir(err);
-          log.error({error:err});
-          res.status(500).end();
-        }
-        res.status(200).type("text/plain").send(uniqueName);
-      });
-    } else {
-      fs.writeFile('usermedia/'+uniqueName, JSON.stringify(fileData), function(err) {
-        if (err) {
-          res.status(500).end();
-          return;
-        }
-        res.status(200).type("text/plain").send(uniqueName);
-      });
-    }
+    Template.findById(id, function(err,template) {
+      res.status(200).type("application/json").send(JSON.stringify(template));
+    });
   });
 
 router.get(
-  '/getFile/:name',
+  '/getImage/:id',
   function(req,res) {
-    var name = req.param('name');
-    console.log("Getting file with name " + name);
+    var id = req.param('id');
+    console.log("Getting image with id " + id);
 
-    if (options.database.saveMediaToDb) {
-      FileData.find({name:name}, function(err,results) {
-        if (results.length>1) {
-          res.status(500).end();
-        } else if(results.length==0) {
-          res.status(404).end();
-        }
-        var file = results[0];
-        res.setHeader('Content-disposition', 'attachment; filename='+file.filename);
-        res.status(200).type(file.mime).send(file.data);
-      });
-    } else {
-      var path = 'usermedia/'+name;
-      fs.exists(path, function(exists) {
-        if (!exists) {
-          res.status(404).end();
-          return;
-        }
-        fs.readFile(path, function(err, data) {
-          if (err) {
-            res.status(500).end();
-            return;
-          }
-          var fileData = JSON.parse(data);
-          // Note that fileData.data didn't survive going to JSON and back.
-          res.setHeader('Content-disposition', 'attachment; filename='+fileData.filename);
-          res.status(200).type(fileData.mime).send(new Buffer(fileData.base64, 'base64'));
-        });
-      });
-    }
-
+    Image.findById(id, function(err,image) {
+      res.setHeader('Content-disposition', 'attachment; filename='+image.filename);
+      res.status(200).type(image.mime).send(image.data);
+    });
   });
 
 router.post(

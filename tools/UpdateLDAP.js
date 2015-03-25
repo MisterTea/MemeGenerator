@@ -5,8 +5,6 @@ var _ = require('lodash');
 var mongoose = require('mongoose');
 
 var model = require('../server/model');
-var Page = model.Page;
-var PageVersion = model.PageVersion;
 var User = model.User;
 var Group = model.Group;
 

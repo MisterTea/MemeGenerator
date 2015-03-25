@@ -5,8 +5,7 @@
   },
   "database":{
     "debug":true,
-    "uri":"mongodb://localhost/memegenerator",
-    "saveMediaToDb":true
+    "uri":"mongodb://localhost/memegenerator"
   },
   "elasticsearch":{
     "enable":false,
