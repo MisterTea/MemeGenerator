@@ -516,7 +516,7 @@ app.controller('CreateMemeController', ['$scope', 'retryHttp', '$timeout', '$loc
     if ($scope.templates.length==0) {
       // Keep increasing Levenshtein distance until we get something
       // or give up.
-      for (var a=1;a<=10 && $scope.templates.length==0;a++) {
+      for (var a=0;a<=10 && $scope.templates.length==0;a++) {
         for (var b=0;b<templates.length;b++) {
           // Get the edit distance
           var lDistance = new Levenshtein(templates[b].name, search).distance;
