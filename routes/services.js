@@ -20,6 +20,8 @@ var Group = model.Group;
 var Template = model.Template;
 var AngularError = model.AngularError;
 
+var backend = require('../server/backend');
+
 var ImageHandler = require('../server/image-handler');
 
 var router = express.Router();
@@ -346,33 +348,22 @@ router.post(
       return;
     }
 
-    // Start by saving the image
-    var image = new Image({
-      data: new Buffer(rawTemplate.base64, 'base64'),
-      mime: rawTemplate.mime,
-      filename: rawTemplate.imageFilename
-    });
+    var data = new Buffer(rawTemplate.base64, 'base64');
+    var mime = rawTemplate.mime;
 
-    image.save(function (err, innerImage) {
+    backend.createTemplate(
+      rawTemplate.name,
+      data,
+      mime,
+      req.user._id,
+      function(err, template) {
       if (err) {
         res.status(500).end();
         return;
       }
-
-      var template = new Template({
-        creatorId:req.user._id,
-        name:rawTemplate.name,
-        imageId:innerImage._id
-      });
-
-      template.save(function (err, innerTemplate) {
-        if (err) {
-          res.status(500).end();
-          return;
-        }
-        res.status(200).type("application/json").send(JSON.stringify(innerTemplate));
-      });
+      res.status(200).type("application/json").send(JSON.stringify(template));
     });
+
   });
 
 

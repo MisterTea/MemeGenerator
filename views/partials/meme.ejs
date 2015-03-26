@@ -1,7 +1,7 @@
 <div>
   <div class="col-md-6">
     <div class="col-md-12" style="padding: 5px 0px;">
-      <img style="width:100%;" ng-if="meme.template" normal-image="{{getFirstFrameImageUrl(meme)}}" hover-image="{{getAllFrameImageUrl(meme)}}"></img>
+      <img style="width:100%;" ng-if="meme.template" normal-image="{{meme | getFirstFrameImageUrl}}" hover-image="{{meme | getAllFrameImageUrl}}"></img>
     </div>
     <div style="float:left; padding: 2px 0px;">
       <strong>{{meme.creator | usernameFromId}}</strong>

@@ -36,6 +36,35 @@ app.filter('usernameFromId', function() {
   };
 });
 
+app.filter('getAllFrameImageUrl',function() {
+  return function(meme) {
+    if (meme.template) {
+      console.log("MEME TEMPLATE");
+      console.dir(meme.template);
+      return "/service/getTemplateAllFrames/"+meme.template._id+"?messages="+Base64.encode(JSON.stringify(meme.messages));
+    } else {
+      return "";
+    }
+  };
+});
+
+app.filter('getFirstFrameImageUrl', function() {
+  return function(meme) {
+    if (meme.template) {
+      console.log("MEME TEMPLATE");
+      console.dir(meme.template);
+      if (meme.template.animated) {
+        console.log("MEME IS ANIMATED");
+        return "/service/getTemplateFirstFrame/"+meme.template._id+"?messages="+Base64.encode(JSON.stringify(meme.messages));
+      } else {
+        return "/service/getTemplateAllFrames/"+meme.template._id+"?messages="+Base64.encode(JSON.stringify(meme.messages));
+      }
+    } else {
+      return "";
+    }
+  };
+});
+
 app.filter('fromNow', function() {
   return function(timestamp) {
     return moment(timestamp).fromNow();
@@ -356,7 +385,7 @@ var chats = [
   }
 ];
 
-app.controller('MainGalleryController', ['$scope', 'retryHttp', '$timeout', '$location', '$routeParams', 'dataCache', function($scope, retryHttp, $timeout, $location, $routeParams, dataCache) {
+app.controller('MainGalleryController', ['dictionaryCache', '$scope', 'retryHttp', '$timeout', '$location', '$routeParams', 'dataCache', function(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache) {
   var galleryType = $location.path().split('/')[1];
   console.log(galleryType);
   if (galleryType == 'recent') {
@@ -364,7 +393,16 @@ app.controller('MainGalleryController', ['$scope', 'retryHttp', '$timeout', '$lo
     retryHttp.get('/service/recent/0/30', function(data, status, headers, config) {
       console.log("GOT MEMES");
       console.dir(data);
-      $scope.memes = data;
+      async.map(data, function(meme, callback) {
+        dictionaryCache.get('template',meme.templateId,function(template) {
+          meme.template = template;
+          console.log("ADDED TEMPLATE");
+          console.dir(template);
+          callback(null, meme);
+        });
+      }, function(err, memesWithTemplates) {
+        $scope.memes = memesWithTemplates;
+      });
     });
   }
 
@@ -407,31 +445,6 @@ app.controller('MainMemeController', ['$routeParams', '$scope', 'retryHttp', '$t
       console.dir(template);
     });
   });
-
-  $scope.getAllFrameImageUrl = function(meme) {
-    if (meme.template) {
-      console.log("MEME TEMPLATE");
-      console.dir(meme.template);
-      return "/service/getTemplateAllFrames/"+meme.template._id+"?messages="+Base64.encode(JSON.stringify($scope.meme.messages));
-    } else {
-      return "";
-    }
-  };
-
-  $scope.getFirstFrameImageUrl = function(meme) {
-    if (meme.template) {
-      console.log("MEME TEMPLATE");
-      console.dir(meme.template);
-      if (meme.template.animated) {
-        console.log("MEME IS ANIMATED");
-        return "/service/getTemplateFirstFrame/"+meme.template._id+"?messages="+Base64.encode(JSON.stringify($scope.meme.messages));
-      } else {
-        return $scope.getAllFrameImageUrl(meme);
-      }
-    } else {
-      return "";
-    }
-  };
 
   $scope.vote = function(memeId, up) {
     // TODO: Hit server
@@ -487,31 +500,6 @@ app.controller('CreateMemeController', ['dataCache', '$scope', 'retryHttp', '$ti
         'content':''
       }
     ]
-  };
-
-  $scope.getAllFrameImageUrl = function(meme) {
-    if (meme.template) {
-      console.log("MEME TEMPLATE");
-      console.dir(meme.template);
-      return "/service/getTemplateAllFrames/"+meme.template._id+"?messages="+Base64.encode(JSON.stringify($scope.meme.messages));
-    } else {
-      return "";
-    }
-  };
-
-  $scope.getFirstFrameImageUrl = function(meme) {
-    if (meme.template) {
-      console.log("MEME TEMPLATE");
-      console.dir(meme.template);
-      if (meme.template.animated) {
-        console.log("MEME IS ANIMATED");
-        return "/service/getTemplateFirstFrame/"+meme.template._id+"?messages="+Base64.encode(JSON.stringify($scope.meme.messages));
-      } else {
-        return $scope.getAllFrameImageUrl(meme);
-      }
-    } else {
-      return "";
-    }
   };
 
   $scope.refreshTemplates = function(search) {

@@ -6,6 +6,7 @@ var ValidFilename = require('valid-filename');
 
 var mongoose = require('mongoose');
 var mongooseHandler = require('../server/mongoose-handler');
+var backend = require('../server/backend');
 
 var model = require('../server/model');
 var Image = model.Image;
@@ -31,31 +32,14 @@ mongooseHandler.init(function callback () {
     if (err) throw err;
     console.log(mime);
 
-    // Start by saving the image
-    var image = new Image({
-      data: fs.readFileSync(imageFileName),
-      mime: mime
-    });
-
-    image.save(function (err, innerImage) {
-      if (err) {
-        throw err;
-      }
-
-      var template = new Template({
-        creatorId:null,
-        name:templateName,
-        imageId:innerImage._id
-      });
-
-      template.save(function (err, innerTemplate) {
-        if (err) {
-          throw err;
-        }
+    backend.createTemplate(
+      templateName,
+      fs.readFileSync(imageFileName),
+      mime,
+      null,
+      function(err, template) {
         console.log("Template created");
         mongooseHandler.disconnect();
       });
-    });
-
   });
 });

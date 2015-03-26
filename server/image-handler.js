@@ -18,8 +18,6 @@ exports.getFirstFrameOfGif = function(imageBuffer, callback) {
 };
 
 exports.annotate = function(imageBuffer, extension, messages, callback) {
-  var handler = gm(imageBuffer, extension);
-
   var sizeContent = function(width,height,content) {
     if (!content) {
       content = '';
@@ -83,6 +81,7 @@ exports.annotate = function(imageBuffer, extension, messages, callback) {
       .drawText(left, drawHeight, finalText, gravity);
   };
 
+  var handler = gm(imageBuffer, extension);
   handler
     .size(function(err, value) {
       if (err) {
@@ -130,6 +129,29 @@ exports.annotate = function(imageBuffer, extension, messages, callback) {
       }
 
       handler
+        .toBuffer(extension, function(err, buffer) {
+          if (err) {
+            callback(null);
+            return;
+          }
+
+          callback(buffer);
+        });
+    });
+};
+
+exports.minSize = function(data, extension, width, height, callback) {
+  var handler = gm(data, extension);
+  handler
+    .size(function(err, value) {
+      if (value.width <= width && value.height <= height) {
+        // Image is already small enough
+        callback(data);
+        return;
+      }
+
+      handler
+        .resize(width, height)
         .toBuffer(extension, function(err, buffer) {
           if (err) {
             callback(null);
