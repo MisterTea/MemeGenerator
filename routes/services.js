@@ -3,6 +3,7 @@ var fs = require('fs');
 var express = require('express');
 var ValidFilename = require('valid-filename');
 var _ = require('lodash');
+var Base64 = require('js-base64').Base64;
 
 var AuthHelper = require('../server/auth-helper');
 var options = require('../server/options-handler').options;
@@ -408,6 +409,8 @@ router.get(
   '/getTemplateAllFrames/:id',
   function(req,res) {
     var id = req.param('id');
+    var messages = JSON.parse(Base64.decode(req.query.messages));
+    console.dir(messages);
 
     Template.findById(id, function(err, template) {
       if (!template) {
@@ -424,11 +427,20 @@ router.get(
 
         var mime = image.mime;
         var data = image.data;
-
         var extension = mime.split('/')[1];
-        var filename = template.name + '.' + extension;
-        res.setHeader('Content-disposition', 'attachment; filename='+filename);
-        res.status(200).type(mime).send(data);
+
+        if (messages) {
+          ImageHandler.annotate(data, extension, messages, function(annotatedImage) {
+            data = annotatedImage;
+            var filename = template.name + '.' + extension;
+            res.setHeader('Content-disposition', 'attachment; filename='+filename);
+            res.status(200).type(mime).send(data);
+          });
+        } else {
+          var filename = template.name + '.' + extension;
+          res.setHeader('Content-disposition', 'attachment; filename='+filename);
+          res.status(200).type(mime).send(data);
+        }
       });
     });
   });

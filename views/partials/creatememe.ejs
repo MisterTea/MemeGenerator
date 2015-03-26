@@ -1,7 +1,7 @@
 <div>
   <div class="col-md-6">
     <div class="col-md-12" style="padding: 5px 0px;">
-      <img style="width:100%;" ng-src="/service/getTemplateAllFrames/{{meme.templateId}}"></img>
+      <img style="width:100%;" ng-src="{{getImageUrl(meme)}}"></img>
     </div>
   </div>
   <div class="col-md-6">
@@ -24,70 +24,85 @@
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group" ng-if="meme.templateId">
         <label for="contextInput" class="col-sm-4 control-label">Top</label>
         <div class="col-sm-8">
-          <textarea class="form-control" rows="3" ng-model="topContent"></textarea>
+          <textarea
+             class="form-control"
+             rows="3"
+             ng-model="$parent.topContent"
+             ng-model-options="{ debounce: 500 }">
+          </textarea>
         </div>
         <label for="contextInput" class="col-sm-4 control-label">&nbsp;</label>
         <div class="col-sm-8" style="text-align: center;">
-          <button type="button" ng-class="getAlignClass('top','left')" ng-click="setAlign('top','left')">
+          <button type="button" ng-class="getAlignClass(0,'left')" ng-click="setAlign(0,'left')">
             <span class="glyphicon glyphicon-align-left"></span>
           </button>
-          <button type="button" ng-class="getAlignClass('top','center')" ng-click="setAlign('top','center')">
+          <button type="button" ng-class="getAlignClass(0,'center')" ng-click="setAlign(0,'center')">
             <span class="glyphicon glyphicon-align-center"></span>
           </button>
-          <button type="button" ng-class="getAlignClass('top','right')" ng-click="setAlign('top','right')">
+          <button type="button" ng-class="getAlignClass(0,'right')" ng-click="setAlign(0,'right')">
             <span class="glyphicon glyphicon-align-right"></span>
           </button>
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group" ng-if="meme.templateId">
         <label for="contextInput" class="col-sm-4 control-label">Middle</label>
         <div class="col-sm-8">
-          <textarea class="form-control" rows="3" ng-model="middleContent"></textarea>
+          <textarea
+             class="form-control"
+             rows="3"
+             ng-model="$parent.middleContent"
+             ng-model-options="{ debounce: 500 }">
+          </textarea>
         </div>
         <label for="contextInput" class="col-sm-4 control-label">&nbsp;</label>
         <div class="col-sm-8" style="text-align: center;">
-          <button type="button" ng-class="getAlignClass('middle','left')" ng-click="setAlign('middle','left')">
+          <button type="button" ng-class="getAlignClass(1,'left')" ng-click="setAlign(1,'left')">
             <span class="glyphicon glyphicon-align-left"></span>
           </button>
-          <button type="button" ng-class="getAlignClass('middle','center')" ng-click="setAlign('middle','center')">
+          <button type="button" ng-class="getAlignClass(1,'center')" ng-click="setAlign(1,'center')">
             <span class="glyphicon glyphicon-align-center"></span>
           </button>
-          <button type="button" ng-class="getAlignClass('middle','right')" ng-click="setAlign('middle','right')">
+          <button type="button" ng-class="getAlignClass(1,'right')" ng-click="setAlign(1,'right')">
             <span class="glyphicon glyphicon-align-right"></span>
           </button>
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group" ng-if="meme.templateId">
         <label for="contextInput" class="col-sm-4 control-label">Bottom</label>
         <div class="col-sm-8">
-          <textarea class="form-control" rows="3" ng-model="bottomContent"></textarea>
+          <textarea
+             class="form-control"
+             rows="3"
+             ng-model="$parent.bottomContent"
+             ng-model-options="{ debounce: 500 }">
+          </textarea>
         </div>
         <label for="contextInput" class="col-sm-4 control-label">&nbsp;</label>
         <div class="col-sm-8" style="text-align: center;">
-          <button type="button" ng-class="getAlignClass('bottom','left')" ng-click="setAlign('bottom','left')">
+          <button type="button" ng-class="getAlignClass(2,'left')" ng-click="setAlign(2,'left')">
             <span class="glyphicon glyphicon-align-left"></span>
           </button>
-          <button type="button" ng-class="getAlignClass('bottom','center')" ng-click="setAlign('bottom','center')">
+          <button type="button" ng-class="getAlignClass(2,'center')" ng-click="setAlign(2,'center')">
             <span class="glyphicon glyphicon-align-center"></span>
           </button>
-          <button type="button" ng-class="getAlignClass('bottom','right')" ng-click="setAlign('bottom','right')">
+          <button type="button" ng-class="getAlignClass(2,'right')" ng-click="setAlign(2,'right')">
             <span class="glyphicon glyphicon-align-right"></span>
           </button>
         </div>
       </div>
 
-      <div class="form-group">
+      <div class="form-group" ng-if="meme.templateId">
         <label for="contextInput" class="col-sm-4 control-label">Context</label>
         <div class="col-sm-8">
           <input type="text" class="form-control" id="contextInput" placeholder="URL with context">
         </div>
       </div>
-      <div class="form-group">
+      <div class="form-group" ng-if="meme.templateId">
         <div class="col-sm-offset-4 col-sm-8">
           <button type="submit" class="btn btn-default">Create Meme</button>
         </div>

@@ -419,19 +419,30 @@ app.controller('CreateMemeController', ['dataCache', '$scope', 'retryHttp', '$ti
   $scope.templateSelected = {};
   $scope.meme = {
     templateId:null,
-    messages:{
-      'top':{
-        'align':'center',
+    messages:[
+      {
+        'valign':'top',
+        'halign':'center',
         'content':''
       },
-      'middle':{
-        'align':'center',
+      {
+        'valign':'center',
+        'halign':'center',
         'content':''
       },
-      'bottom':{
-        'align':'center',
+      {
+        'valign':'bottom',
+        'halign':'center',
         'content':''
       }
+    ]
+  };
+
+  $scope.getImageUrl = function(meme) {
+    if (meme.templateId) {
+      return "/service/getTemplateAllFrames/"+meme.templateId+"?messages="+Base64.encode(JSON.stringify($scope.meme.messages));
+    } else {
+      return "";
     }
   };
 
@@ -474,14 +485,14 @@ app.controller('CreateMemeController', ['dataCache', '$scope', 'retryHttp', '$ti
 
   $scope.getAlignClass = function(slot, align) {
     var classes = ['btn','btn-default'];
-    if ($scope.meme.messages[slot].align == align) {
+    if ($scope.meme.messages[slot].halign == align) {
       classes.push('active');
     }
     return classes;
   };
 
   $scope.setAlign = function(slot, align) {
-    $scope.meme.messages[slot].align = align;
+    $scope.meme.messages[slot].halign = align;
   };
 
   $scope.changeTemplate = function(item, model) {
@@ -500,12 +511,13 @@ app.controller('CreateMemeController', ['dataCache', '$scope', 'retryHttp', '$ti
   }, true);
 
   $scope.$watch('topContent', function(newValue, oldValue) {
-    $scope.meme.messages['top']['content'] = newValue;
+    console.log("TOP CONTENT CHANGED");
+    $scope.meme.messages[0]['content'] = newValue;
   });
   $scope.$watch('middleContent', function(newValue, oldValue) {
-    $scope.meme.messages['middle']['content'] = newValue;
+    $scope.meme.messages[1]['content'] = newValue;
   });
   $scope.$watch('bottomContent', function(newValue, oldValue) {
-    $scope.meme.messages['bottom']['content'] = newValue;
+    $scope.meme.messages[2]['content'] = newValue;
   });
 }]);
