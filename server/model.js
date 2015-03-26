@@ -56,16 +56,15 @@ exports.Image = mongoose.model("Image",ImageSchema);
 
 var MemeSchema = new mongoose.Schema({
   creatorId: {type:ObjectId, index:true, required:true, validate:isObjectId},
-  imageId: {type:ObjectId, index:true, required:true, validate:isObjectId},
+  templateId: {type:ObjectId, index:true, required:true, validate:isObjectId},
   messages: [{
-    memeId: {type:ObjectId, index:true, required:true, validate:isObjectId},
     valign: {type:String, required:true, validate:function(valign) {
       return valign == 'top' || valign == 'center' || valign == 'bottom';
     }},
     halign: {type:String, required:true, validate:function(halign) {
       return halign == 'left' || halign == 'center' || halign == 'right';
     }},
-    content: {type:String, index:true, required:true}
+    content: {type:String, index:true}
   }],
   chatlog: [{
     creatorId: {type:ObjectId, index:true, validate:isObjectId, required:true},

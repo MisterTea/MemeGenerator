@@ -1,6 +1,8 @@
 <div>
   <div ng-repeat="meme in memes" class="col-md-4" style="margin-bottom: 50px;">
-    <memegallery info="meme"></memegallery>
+    <div class="col-md-12" style="padding: 5px 0px;">
+      <img style="width:100%;" ng-if="meme.template" normal-image="{{getFirstFrameImageUrl(meme)}}" hover-image="{{getAllFrameImageUrl(meme)}}"></img>
+    </div>
     <div style="float:left;">
       <small><strong>{{meme.creator | usernameFromId}}</strong></small>
     </div>

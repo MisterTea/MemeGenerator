@@ -255,10 +255,30 @@ app.directive('memedetail', function($compile) {
       meme: '=info'
     },
     template:'<div class="col-md-12" style="padding: 5px 0px;">'+
-                 '<a ng-href="/gallery.html#/meme/{{meme._id}}">'+
                  '<img style="width:100%;" ng-src="{{meme.url}}"></img>'+
-                 '</a>'+
                  '</div>'
+  };
+});
+
+app.directive('hoverImage',function(){
+  return {
+    link: function(scope, elm, attrs){
+      console.log("CREATED HOVERIMAGE");
+      elm[0].src = attrs.normalImage;
+      var normalImage = new Image();
+      normalImage.src = attrs.normalImage;
+      var hoverImage = new Image();
+      hoverImage.src = attrs.hoverImage;
+
+      elm.bind('mouseenter',function(){
+        console.log("setting hover image");
+        this.src = hoverImage.src;
+      });
+      elm.bind('mouseleave',function(){
+        console.log("Setting normal image");
+        this.src = normalImage.src;
+      });
+    }
   };
 });
 
@@ -378,9 +398,40 @@ app.controller('MainGalleryController', ['$scope', 'retryHttp', '$timeout', '$lo
   };
 }]);
 
-app.controller('MainMemeController', ['$scope', 'retryHttp', '$timeout', '$location', function($scope, retryHttp, $timeout, $location) {
-  $scope.meme = memes['1'];
-  $scope.chats = chats;
+app.controller('MainMemeController', ['$routeParams', '$scope', 'retryHttp', '$timeout', '$location', 'dictionaryCache', function($routeParams, $scope, retryHttp, $timeout, $location, dictionaryCache) {
+  retryHttp.get("/service/getMeme/"+$routeParams.memeId, function(result) {
+    $scope.meme = result;
+    dictionaryCache.get('template',$scope.meme.templateId,function(template) {
+      $scope.meme.template = template;
+      console.log("ADDED TEMPLATE");
+      console.dir(template);
+    });
+  });
+
+  $scope.getAllFrameImageUrl = function(meme) {
+    if (meme.template) {
+      console.log("MEME TEMPLATE");
+      console.dir(meme.template);
+      return "/service/getTemplateAllFrames/"+meme.template._id+"?messages="+Base64.encode(JSON.stringify($scope.meme.messages));
+    } else {
+      return "";
+    }
+  };
+
+  $scope.getFirstFrameImageUrl = function(meme) {
+    if (meme.template) {
+      console.log("MEME TEMPLATE");
+      console.dir(meme.template);
+      if (meme.template.animated) {
+        console.log("MEME IS ANIMATED");
+        return "/service/getTemplateFirstFrame/"+meme.template._id+"?messages="+Base64.encode(JSON.stringify($scope.meme.messages));
+      } else {
+        return $scope.getAllFrameImageUrl(meme);
+      }
+    } else {
+      return "";
+    }
+  };
 
   $scope.vote = function(memeId, up) {
     // TODO: Hit server
@@ -416,9 +467,9 @@ app.controller('CreateMemeController', ['dataCache', '$scope', 'retryHttp', '$ti
   dataCache.get('allTemplates', function(data) {
     $scope.templates = $scope.allTemplates = data;
   });
-  $scope.templateSelected = {};
+  $scope.templateSelected = null;
   $scope.meme = {
-    templateId:null,
+    template:null,
     messages:[
       {
         'valign':'top',
@@ -438,9 +489,26 @@ app.controller('CreateMemeController', ['dataCache', '$scope', 'retryHttp', '$ti
     ]
   };
 
-  $scope.getImageUrl = function(meme) {
-    if (meme.templateId) {
-      return "/service/getTemplateAllFrames/"+meme.templateId+"?messages="+Base64.encode(JSON.stringify($scope.meme.messages));
+  $scope.getAllFrameImageUrl = function(meme) {
+    if (meme.template) {
+      console.log("MEME TEMPLATE");
+      console.dir(meme.template);
+      return "/service/getTemplateAllFrames/"+meme.template._id+"?messages="+Base64.encode(JSON.stringify($scope.meme.messages));
+    } else {
+      return "";
+    }
+  };
+
+  $scope.getFirstFrameImageUrl = function(meme) {
+    if (meme.template) {
+      console.log("MEME TEMPLATE");
+      console.dir(meme.template);
+      if (meme.template.animated) {
+        console.log("MEME IS ANIMATED");
+        return "/service/getTemplateFirstFrame/"+meme.template._id+"?messages="+Base64.encode(JSON.stringify($scope.meme.messages));
+      } else {
+        return $scope.getAllFrameImageUrl(meme);
+      }
     } else {
       return "";
     }
@@ -493,6 +561,7 @@ app.controller('CreateMemeController', ['dataCache', '$scope', 'retryHttp', '$ti
 
   $scope.setAlign = function(slot, align) {
     $scope.meme.messages[slot].halign = align;
+    $scope.forceRefreshMeme();
   };
 
   $scope.changeTemplate = function(item, model) {
@@ -500,24 +569,45 @@ app.controller('CreateMemeController', ['dataCache', '$scope', 'retryHttp', '$ti
   };
 
   $scope.$watch('templateSelected', function(newValue, oldValue) {
+    console.log("NEW TEMPLATE");
+    console.log(newValue);
     if (newValue) {
-      $scope.meme.templateId = newValue._id;
+      // Hacky way to force the meme directive to recompile
+      $scope.meme.template = null;
+      $timeout(function() {
+        $scope.meme.template = newValue;
+      });
     }
   });
 
-  $scope.$watch('meme', function(newValue, oldValue) {
-    console.log("MEME CHANGED");
-    console.dir(newValue);
-  }, true);
+  $scope.forceRefreshMeme = function() {
+    var template = $scope.meme.template;
+    // Hacky way to force the meme directive to recompile
+    $scope.meme.template = null;
+    $timeout(function() {
+      $scope.meme.template = template;
+    });
+  };
 
   $scope.$watch('topContent', function(newValue, oldValue) {
-    console.log("TOP CONTENT CHANGED");
     $scope.meme.messages[0]['content'] = newValue;
+    $scope.forceRefreshMeme();
   });
   $scope.$watch('middleContent', function(newValue, oldValue) {
     $scope.meme.messages[1]['content'] = newValue;
+    $scope.forceRefreshMeme();
   });
   $scope.$watch('bottomContent', function(newValue, oldValue) {
     $scope.meme.messages[2]['content'] = newValue;
+    $scope.forceRefreshMeme();
   });
+
+  $scope.createMeme = function() {
+    retryHttp.post("/service/createMeme", $scope.meme, function(result) {
+      console.dir(result);
+      var newMemeId = result._id;
+      console.log("Created meme: " + newMemeId);
+      $location.path("/meme/" + newMemeId);
+    });
+  };
 }]);

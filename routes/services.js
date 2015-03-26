@@ -4,6 +4,7 @@ var express = require('express');
 var ValidFilename = require('valid-filename');
 var _ = require('lodash');
 var Base64 = require('js-base64').Base64;
+var async = require('async');
 
 var AuthHelper = require('../server/auth-helper');
 var options = require('../server/options-handler').options;
@@ -77,14 +78,17 @@ router.post(
 
     // sanitize
     var rawMeme = req.body;
-    rawMeme._id = null;
+    delete rawMeme._id;
     rawMeme.creatorId = req.user._id;
     rawMeme.votes = [req.user._id];
+    rawMeme.templateId = rawMeme.template._id;
+    delete rawMeme.template;
 
     var meme = new Meme(rawMeme);
     log.debug({text:"CREATING MEME:", meme:meme});
 
     meme.save(function(err, innerMeme) {
+      log.debug({text:"CREATED MEME:", meme:innerMeme});
       if (err) {
         log.error(err);
         res.status(500).end();
@@ -372,24 +376,27 @@ router.post(
   });
 
 
-var isTemplateAnimated = function(template) {
+var addTemplateMetadata = function(template, callback) {
   Image.findById(template.imageId).select('mime').exec(function(err,image) {
     if (!image) {
-      return false;
+      callback(null, template);
     }
 
-    return image.mime == 'image/gif';
+    template.animated = (image.mime == 'image/gif');
+    console.log("SETTING TEMPLATE ANIMATED: " + template.animated);
+    console.dir(template);
+    callback(null, template);
   });
 };
 
 router.get(
   '/getAllTemplates',
   function(req,res) {
-    Template.find({}, function(err,templates) {
-      for (var a=0;a<templates.length;a++) {
-        templates[a].animated = isTemplateAnimated(templates[a]);
-      }
-      res.status(200).type("application/json").send(JSON.stringify(templates));
+    Template.find({}).lean().exec(function(err,templates) {
+      async.map(templates, addTemplateMetadata, function(err, innerTemplates) {
+        console.dir(innerTemplates);
+        res.status(200).type("application/json").send(JSON.stringify(innerTemplates));
+      });
     });
   });
 
@@ -399,9 +406,10 @@ router.get(
     var id = req.param('id');
     console.log("Getting template with id " + id);
 
-    Template.findById(id, function(err,template) {
-      template.animated = isTemplateAnimated(template);
-      res.status(200).type("application/json").send(JSON.stringify(template));
+    Template.findById(id).lean().exec(function(err,template) {
+      addTemplateMetadata(template, function(err, innerTemplate) {
+        res.status(200).type("application/json").send(JSON.stringify(innerTemplate));
+      });
     });
   });
 
@@ -449,6 +457,7 @@ router.get(
   '/getTemplateFirstFrame/:id',
   function(req,res) {
     var id = req.param('id');
+    var messages = JSON.parse(Base64.decode(req.query.messages));
 
     Template.findById(id, function(err, template) {
       if (!template) {
@@ -470,7 +479,12 @@ router.get(
           var extension = mime.split('/')[1];
           var filename = template.name + '.' + extension;
           res.setHeader('Content-disposition', 'attachment; filename='+filename);
-          res.status(200).type(mime).send(data);
+          ImageHandler.annotate(data, extension, messages, function(annotatedImage) {
+            data = annotatedImage;
+            var filename = template.name + '.' + extension;
+            res.setHeader('Content-disposition', 'attachment; filename='+filename);
+            res.status(200).type(mime).send(data);
+          });
         };
 
         if (mime == 'image/gif') {
