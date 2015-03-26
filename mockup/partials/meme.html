@@ -31,7 +31,7 @@
               <div class="header">
                 <strong class="primary-font">{{chat.author | usernameFromId}}</strong>
                 <small class="pull-right text-muted" style="margin: 0px 0px;">
-                  <span class="glyphicon glyphicon-time"></span>{{chat.timestamp | relativeTime}}
+                  <span class="glyphicon glyphicon-time"></span><span relative-time="{{chat.timestamp}}"></span>
                 </small>
               </div>
               <p>

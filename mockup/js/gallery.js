@@ -36,11 +36,45 @@ app.filter('usernameFromId', function() {
   };
 });
 
-app.filter('relativeTime', function() {
+app.filter('fromNow', function() {
   return function(timestamp) {
-    return '10 minutes ago';
+    return moment(timestamp).fromNow();
   };
 });
+
+app.directive('relativeTime',
+  [
+    '$timeout',
+    '$filter',
+    function($timeout, $filter) {
+      return function(scope, element, attrs) {
+        var time = parseInt(attrs.relativeTime);
+        var intervalLength = 1000 * 10; // 10 seconds
+        var filter = $filter('fromNow');
+        var timeoutId;
+
+        function updateTime() {
+          element.text(filter(time));
+        }
+
+        function updateLater() {
+          timeoutId = $timeout(function() {
+            updateTime();
+            updateLater();
+          }, intervalLength);
+        }
+
+        element.bind('$destroy', function() {
+          $timeout.cancel(timeoutId);
+        });
+
+        updateTime();
+        updateLater();
+      };
+
+    }
+  ]
+);
 
 app.filter('linkify', ['$sce', function($sce) {
   return function(text) {
@@ -298,57 +332,68 @@ var chats = [
   {
     '_id':'1',
     'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost'
+    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
+    'timestamp':Date.now()
   },
   {
     '_id':'1',
     'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost'
+    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
+    'timestamp':Date.now()
   },
   {
     '_id':'1',
     'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost'
+    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
+    'timestamp':Date.now()
   },
   {
     '_id':'1',
     'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost'
+    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
+    'timestamp':Date.now()
   },
   {
     '_id':'1',
     'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost'
+    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
+    'timestamp':Date.now()
   },
   {
     '_id':'1',
     'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost'
+    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
+    'timestamp':Date.now()
   },
   {
     '_id':'1',
     'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost'
+    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
+    'timestamp':Date.now()
   },
   {
     '_id':'1',
     'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost'
+    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
+    'timestamp':Date.now()
   },
   {
     '_id':'1',
     'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost'
+    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
+    'timestamp':Date.now()
   },
   {
     '_id':'1',
     'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost'
+    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
+    'timestamp':Date.now()
   },
   {
     '_id':'2',
     'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost'
+    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
+    'timestamp':Date.now()
   }
 ];
 
@@ -458,10 +503,6 @@ app.controller('MainMemeController', ['$scope', 'retryHttp', '$timeout', '$locat
                     $location.port() +
                     url);
   };
-
-  $scope.trustWrapper = function(s) {
-    return s;
-  };
 }]);
 
 var templates = [
@@ -483,7 +524,7 @@ app.controller('CreateMemeController', ['$scope', 'retryHttp', '$timeout', '$loc
   $scope.templates = templates;
   $scope.templateSelected = {};
   $scope.meme = {
-    template:null,
+    templateId:null,
     messages:{
       'top':{
         'align':'center',
