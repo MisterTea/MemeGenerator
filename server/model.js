@@ -50,7 +50,7 @@ exports.Template = mongoose.model("Template",TemplateSchema);
 var ImageSchema = mongoose.Schema({
   data: {type:Buffer, required:true},
   mime: {type:String, required:true},
-  filename: {type:String, required:true}
+  firstFrameData: {type:Buffer}
 });
 exports.Image = mongoose.model("Image",ImageSchema);
 

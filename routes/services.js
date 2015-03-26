@@ -1,8 +1,10 @@
 var fs = require('fs');
 
 var express = require('express');
-var AuthHelper = require('../server/auth-helper');
+var ValidFilename = require('valid-filename');
 var _ = require('lodash');
+
+var AuthHelper = require('../server/auth-helper');
 var options = require('../server/options-handler').options;
 
 var SearchHandler = require('../server/search-handler');
@@ -15,6 +17,8 @@ var User = model.User;
 var Group = model.Group;
 var Template = model.Template;
 var AngularError = model.AngularError;
+
+var ImageHandler = require('../server/image-handler');
 
 var router = express.Router();
 
@@ -90,7 +94,29 @@ router.post(
   }
 );
 
-router.post(
+router.get(
+  '/recent/:offset/:size',
+  function(req, res) {
+    var offset = req.param('offset');
+    var size = req.param('size');
+
+    Meme
+      .find({})
+      .sort('-creationTime')
+      .skip(offset)
+      .limit(size)
+      .exec(function(err, memes) {
+        if (err) {
+          res.status(500).end();
+          return;
+        }
+
+        res.status(200).type("application/json").send(JSON.stringify(memes));
+      });
+  }
+);
+
+router.get(
   '/getMeme/:id',
   function(req, res) {
     var id = req.param('id');
@@ -301,10 +327,16 @@ router.post(
     console.log("SAVING TEMPLATE");
     var rawTemplate = req.body;
 
+    // Sanitize
+    if (!ValidFilename(rawTemplate.name)) {
+      res.status(500).end();
+      return;
+    }
+
     if (!rawTemplate.name ||
+        rawTemplate.name.length == 0 ||
         !rawTemplate.base64 ||
-        !rawTemplate.mime ||
-        !rawTemplate.imageFilename) {
+        !rawTemplate.mime) {
       res.status(500).end();
       return;
     }
@@ -338,26 +370,126 @@ router.post(
     });
   });
 
+
+var isTemplateAnimated = function(template) {
+  Image.findById(template.imageId).select('mime').exec(function(err,image) {
+    if (!image) {
+      return false;
+    }
+
+    return image.mime == 'image/gif';
+  });
+};
+
+router.get(
+  '/getAllTemplates',
+  function(req,res) {
+    Template.find({}, function(err,templates) {
+      for (var a=0;a<templates.length;a++) {
+        templates[a].animated = isTemplateAnimated(templates[a]);
+      }
+      res.status(200).type("application/json").send(JSON.stringify(templates));
+    });
+  });
+
 router.get(
   '/getTemplate/:id',
   function(req,res) {
     var id = req.param('id');
-    console.log("Getting image with id " + id);
+    console.log("Getting template with id " + id);
 
     Template.findById(id, function(err,template) {
+      template.animated = isTemplateAnimated(template);
       res.status(200).type("application/json").send(JSON.stringify(template));
     });
   });
 
 router.get(
-  '/getImage/:id',
+  '/getTemplateAllFrames/:id',
   function(req,res) {
     var id = req.param('id');
-    console.log("Getting image with id " + id);
 
-    Image.findById(id, function(err,image) {
-      res.setHeader('Content-disposition', 'attachment; filename='+image.filename);
-      res.status(200).type(image.mime).send(image.data);
+    Template.findById(id, function(err, template) {
+      if (!template) {
+        console.log("COULD NOT FIND TEMPLATE: " + id);
+        res.status(404).end();
+        return;
+      }
+
+      Image.findById(template.imageId, function(err,image) {
+        if (!image) {
+          res.status(500).end();
+          return;
+        }
+
+        var mime = image.mime;
+        var data = image.data;
+
+        var extension = mime.split('/')[1];
+        var filename = template.name + '.' + extension;
+        res.setHeader('Content-disposition', 'attachment; filename='+filename);
+        res.status(200).type(mime).send(data);
+      });
+    });
+  });
+
+router.get(
+  '/getTemplateFirstFrame/:id',
+  function(req,res) {
+    var id = req.param('id');
+
+    Template.findById(id, function(err, template) {
+      if (!template) {
+        console.log("COULD NOT FIND TEMPLATE: " + id);
+        res.status(404).end();
+        return;
+      }
+
+      Image.findById(template.imageId, function(err,image) {
+        if (!image) {
+          res.status(500).end();
+          return;
+        }
+
+        var mime = image.mime;
+        var data = image.data;
+
+        var uploadImage = function() {
+          var extension = mime.split('/')[1];
+          var filename = template.name + '.' + extension;
+          res.setHeader('Content-disposition', 'attachment; filename='+filename);
+          res.status(200).type(mime).send(data);
+        };
+
+        if (mime == 'image/gif') {
+          mime = 'image/png';
+          data = image.firstFrameData;
+          if (data) {
+            uploadImage();
+          } else {
+            // Compute the first frame
+            log.info("Computing the first frame of a gif");
+            ImageHandler.getFirstFrameOfGif(image.data, function(firstFrameData) {
+              if (!firstFrameData) {
+                res.status(500).end();
+                return;
+              }
+              image.firstFrameData = firstFrameData;
+              data = firstFrameData;
+              image.save(function(err, innerImage) {
+                if (err) {
+                  res.status(500).end();
+                  return;
+                }
+                uploadImage();
+              });
+            });
+          }
+        } else {
+          res.status(204).end();
+          return;
+        }
+      });
     });
   });
 

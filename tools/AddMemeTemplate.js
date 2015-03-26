@@ -2,6 +2,7 @@ var fs = require('fs');
 
 var mmm = require('mmmagic'),
     Magic = mmm.Magic;
+var ValidFilename = require('valid-filename');
 
 var mongoose = require('mongoose');
 var mongooseHandler = require('../server/mongoose-handler');
@@ -20,6 +21,11 @@ mongooseHandler.init(function callback () {
     throw "OOPS";
   }
 
+  if (!ValidFilename(templateName)) {
+    throw "OOPS";
+    return;
+  }
+
   var magic = new Magic(mmm.MAGIC_MIME_TYPE);
   magic.detectFile(imageFileName, function(err, mime) {
     if (err) throw err;
@@ -28,8 +34,7 @@ mongooseHandler.init(function callback () {
     // Start by saving the image
     var image = new Image({
       data: fs.readFileSync(imageFileName),
-      mime: mime,
-      filename:imageFileName
+      mime: mime
     });
 
     image.save(function (err, innerImage) {

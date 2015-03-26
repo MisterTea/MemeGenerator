@@ -38,10 +38,6 @@ app.filter('usernameFromId', function() {
 
 app.filter('fromNow', function() {
   return function(timestamp) {
-    console.log(timestamp);
-    console.log(Date.now());
-    console.log("TIMESTAMP: " + moment(timestamp).format() + " " + moment(Date.now()).format());
-    console.log(moment(timestamp).fromNow());
     return moment(timestamp).fromNow();
   };
 });
@@ -52,9 +48,7 @@ app.directive('relativeTime',
     '$filter',
     function($timeout, $filter) {
       return function(scope, element, attrs) {
-        console.dir(attrs);
         var time = parseInt(attrs.relativeTime);
-        console.log(time);
         var intervalLength = 1000 * 10; // 10 seconds
         var filter = $filter('fromNow');
         var timeoutId;
@@ -85,6 +79,12 @@ app.directive('relativeTime',
 app.filter('linkify', ['$sce', function($sce) {
   return function(text) {
     return $sce.trustAsHtml(Autolinker.link(text));
+  };
+}]);
+
+app.filter('trust', ['$sce', function($sce) {
+  return function(text) {
+    return $sce.trustAsHtml(text);
   };
 }]);
 
@@ -225,14 +225,11 @@ app.directive('memegallery', function($compile) {
 
 app.directive('memedetail', function($compile) {
   var compile = function(element, attrs) {
-    return {
-      post: function(scope, element, attrs) {
         console.log("POST");
-        console.dir(scope.meme);
-        if (!scope.meme) {
-          return;
-        }
+        console.dir(attrs);
+        console.dir(element);
 
+        /*
         createImage(scope.meme.messages, function(imageData, width, height) {
           // set canvasImg image src to dataURL
           // so it can be saved as an image
@@ -248,8 +245,7 @@ app.directive('memedetail', function($compile) {
         });
         console.dir(element.find('a')[0]);
         console.dir(element.find('img')[0]);
-      }
-    };
+         */
   };
 
   return {
@@ -265,63 +261,6 @@ app.directive('memedetail', function($compile) {
                  '</div>'
   };
 });
-
-var memes = {
-  "1":{
-    _id:"1",
-    url:"/images/Templates/One-Does-Not-Simply.jpg",
-    messages:{
-      top:"Hello World"
-    },
-    votes:10,
-    creator:'123'
-  },
-  "2":{
-    _id:"2",
-    url:"/images/Templates/One-Does-Not-Simply.jpg",
-    messages:{
-      middle:"Hello World"
-    },
-    votes:10,
-    creator:'123'
-  },
-  "3":{
-    _id:"3",
-    url:"/images/Templates/One-Does-Not-Simply.jpg",
-    messages:{
-      bottom:"Hello World"
-    },
-    votes:10,
-    creator:'123'
-  },
-  "4":{
-    _id:"4",
-    url:"/images/Templates/One-Does-Not-Simply.jpg",
-    messages:{
-      bottomright:"Hello World"
-    },
-    votes:10,
-    creator:'123'
-  },
-  "5":{
-    _id:"5",
-    url:"/images/Templates/One-Does-Not-Simply.jpg",
-    messages:{
-      bottomleft:"Hello World"
-    },
-    votes:10,
-    creator:'123'
-  },
-  "6":{
-    _id:"6",
-    url:"/images/Templates/One-Does-Not-Simply.jpg",
-    messages:{
-      bottom:"Hello World"
-    },
-    votes:10,
-    creator:'123'
-  }
-};
 
 var myself = {
   voted: {'1':true},
@@ -398,15 +337,24 @@ var chats = [
 ];
 
 app.controller('MainGalleryController', ['$scope', 'retryHttp', '$timeout', '$location', '$routeParams', 'dataCache', function($scope, retryHttp, $timeout, $location, $routeParams, dataCache) {
-  $scope.memes = memes;
+  var galleryType = $location.path().split('/')[1];
+  console.log(galleryType);
+  if (galleryType == 'recent') {
+    console.log("FETCHING");
+    retryHttp.get('/service/recent/0/30', function(data, status, headers, config) {
+      console.log("GOT MEMES");
+      console.dir(data);
+      $scope.memes = data;
+    });
+  }
 
   $scope.vote = function(memeId, up) {
     // TODO: Hit server
     console.log(memeId);
     if (up) {
-      $scope.memes[memeId].votes++;
+      //$scope.memes[memeId].votes++;
     } else {
-      $scope.memes[memeId].votes--;
+      //$scope.memes[memeId].votes--;
     }
   };
 
@@ -464,24 +412,13 @@ app.controller('MainMemeController', ['$scope', 'retryHttp', '$timeout', '$locat
   };
 }]);
 
-var templates = {
-  '1':{
-    '_id':'1',
-    'name':'xzibit',
-    'image':'123'
-  },
-  '2':{
-    '_id':'2',
-    'name':'xzibit2',
-    'image':'123'
-  }
-};
-
-app.controller('CreateMemeController', ['$scope', 'retryHttp', '$timeout', '$location', function($scope, retryHttp, $timeout, $location) {
-  $scope.templates = templates;
-  $scope.templateSelected = null;
+app.controller('CreateMemeController', ['dataCache', '$scope', 'retryHttp', '$timeout', '$location', '$sce', function(dataCache, $scope, retryHttp, $timeout, $location, $sce) {
+  dataCache.get('allTemplates', function(data) {
+    $scope.templates = $scope.allTemplates = data;
+  });
+  $scope.templateSelected = {};
   $scope.meme = {
-    template:null,
+    templateId:null,
     messages:{
       'top':{
         'align':'center',
@@ -498,6 +435,43 @@ app.controller('CreateMemeController', ['$scope', 'retryHttp', '$timeout', '$loc
     }
   };
 
+  $scope.refreshTemplates = function(search) {
+    if (!$scope.allTemplates) {
+      return;
+    }
+    var templates = $scope.allTemplates;
+
+    if (search.length==0) {
+      $scope.templates = templates;
+      return;
+    }
+
+    $scope.templates = [];
+    for (var a=0;a<templates.length;a++) {
+      if (templates[a].name.indexOf(search) != -1) {
+        $scope.templates.push(templates[a]);
+      }
+    }
+
+    if ($scope.templates.length==0) {
+      // Keep increasing Levenshtein distance until we get something
+      // or give up.
+      for (var a=0;a<=10 && $scope.templates.length==0;a++) {
+        for (var b=0;b<templates.length;b++) {
+          // Get the edit distance
+          var lDistance = new Levenshtein(templates[b].name, search).distance;
+
+          // Do not penalize longer template names
+          var lengthDiff = Math.max(0,templates[b].name.length - search.length);
+
+          if (lDistance - lengthDiff <= a) {
+            $scope.templates.push(templates[b]);
+          }
+        }
+      }
+    }
+  };
+
   $scope.getAlignClass = function(slot, align) {
     var classes = ['btn','btn-default'];
     if ($scope.meme.messages[slot].align == align) {
@@ -510,14 +484,13 @@ app.controller('CreateMemeController', ['$scope', 'retryHttp', '$timeout', '$loc
     $scope.meme.messages[slot].align = align;
   };
 
+  $scope.changeTemplate = function(item, model) {
+    $scope.templateSelected = item;
+  };
+
   $scope.$watch('templateSelected', function(newValue, oldValue) {
-    console.log("TEMPLATE CHANGED: " + oldValue + " -> " + newValue);
-    var templateId;
-    for (templateId in $scope.templates) {
-      if ($scope.templates[templateId].name == newValue) {
-        $scope.meme.template = templateId;
-        break;
-      }
+    if (newValue) {
+      $scope.meme.templateId = newValue._id;
     }
   });
 

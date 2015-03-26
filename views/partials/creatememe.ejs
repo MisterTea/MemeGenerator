@@ -1,15 +1,26 @@
 <div>
   <div class="col-md-6">
-    <memedetail info="meme"></memedetail>
+    <div class="col-md-12" style="padding: 5px 0px;">
+      <img style="width:100%;" ng-src="/service/getTemplateAllFrames/{{meme.templateId}}"></img>
+    </div>
   </div>
   <div class="col-md-6">
     <form class="form-horizontal">
       <div class="form-group">
         <label for="memeSelect" class="col-sm-4 control-label">Template</label>
         <div class="col-sm-8">
-          <select id="memeSelect" class="form-control" ng-model="templateSelected">
-            <option ng-repeat="template in templates" id="{{template._id}}">{{template.name}}</option>
-          </select>
+          <ui-select ng-model="templateTyped"
+                     on-select="changeTemplate($item, $model)"
+                     theme="bootstrap"
+                     reset-search-input="false"
+                     style="width: 300px;">
+            <ui-select-match placeholder="Choose a template...">{{$select.selected.name}}</ui-select-match>
+            <ui-select-choices repeat="template in templates track by $index"
+                               refresh="refreshTemplates($select.search)"
+                               refresh-delay="0">
+              <div ng-bind-html="template.name | highlight: $select.search | trust"></div>
+            </ui-select-choices>
+          </ui-select>
         </div>
       </div>
 
