@@ -48,6 +48,12 @@ app.filter('linkify', ['$sce', function($sce) {
   };
 }]);
 
+app.filter('trust', ['$sce', function($sce) {
+  return function(text) {
+    return $sce.trustAsHtml(text);
+  };
+}]);
+
 var createImage = function(messages, callback) {
   WebFont.load({
     custom: {
@@ -452,24 +458,30 @@ app.controller('MainMemeController', ['$scope', 'retryHttp', '$timeout', '$locat
                     $location.port() +
                     url);
   };
+
+  $scope.trustWrapper = function(s) {
+    return s;
+  };
 }]);
 
-var templates = {
-  '1':{
+var templates = [
+  {
     '_id':'1',
     'name':'xzibit',
-    'image':'123'
+    'imageId':'123',
+    'creatorId':'123123'
   },
-  '2':{
+  {
     '_id':'2',
     'name':'xzibit2',
-    'image':'123'
+    'imageId':'123',
+    'creatorId':'123123'
   }
-};
+];
 
-app.controller('CreateMemeController', ['$scope', 'retryHttp', '$timeout', '$location', function($scope, retryHttp, $timeout, $location) {
+app.controller('CreateMemeController', ['$scope', 'retryHttp', '$timeout', '$location', '$sce', function($scope, retryHttp, $timeout, $location, $sce) {
   $scope.templates = templates;
-  $scope.templateSelected = null;
+  $scope.templateSelected = {};
   $scope.meme = {
     template:null,
     messages:{
@@ -488,6 +500,38 @@ app.controller('CreateMemeController', ['$scope', 'retryHttp', '$timeout', '$loc
     }
   };
 
+  $scope.refreshTemplates = function(search) {
+    if (search.length==0) {
+      $scope.templates = templates;
+      return;
+    }
+
+    $scope.templates = [];
+    for (var a=0;a<templates.length;a++) {
+      if (templates[a].name.indexOf(search) != -1) {
+        $scope.templates.push(templates[a]);
+      }
+    }
+
+    if ($scope.templates.length==0) {
+      // Keep increasing Levenshtein distance until we get something
+      // or give up.
+      for (var a=1;a<=10 && $scope.templates.length==0;a++) {
+        for (var b=0;b<templates.length;b++) {
+          // Get the edit distance
+          var lDistance = new Levenshtein(templates[b].name, search).distance;
+
+          // Do not penalize longer template names
+          var lengthDiff = Math.max(0,templates[b].name.length - search.length);
+
+          if (lDistance - lengthDiff <= a) {
+            $scope.templates.push(templates[b]);
+          }
+        }
+      }
+    }
+  };
+
   $scope.getAlignClass = function(slot, align) {
     var classes = ['btn','btn-default'];
     if ($scope.meme.messages[slot].align == align) {
@@ -500,14 +544,13 @@ app.controller('CreateMemeController', ['$scope', 'retryHttp', '$timeout', '$loc
     $scope.meme.messages[slot].align = align;
   };
 
+  $scope.changeTemplate = function(item, model) {
+    $scope.templateSelected = item;
+  };
+
   $scope.$watch('templateSelected', function(newValue, oldValue) {
-    console.log("TEMPLATE CHANGED: " + oldValue + " -> " + newValue);
-    var templateId;
-    for (templateId in $scope.templates) {
-      if ($scope.templates[templateId].name == newValue) {
-        $scope.meme.template = templateId;
-        break;
-      }
+    if (newValue) {
+      $scope.meme.templateId = newValue._id;
     }
   });
 
