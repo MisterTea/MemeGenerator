@@ -12,7 +12,7 @@ exports.ensureAuthenticated = function(req, res, next) {
     next();
     return;
   }
-  var totalUrl = req.baseUrl + req.url;
+  var totalUrl = req.originalUrl;
   log.warn({invalidAuthentication:true,user:req.user,url:totalUrl});
-  res.redirect('/login?redirect='+totalUrl);
+  res.redirect('/login?redirect='+encodeURIComponent(totalUrl));
 };
