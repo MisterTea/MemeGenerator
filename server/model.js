@@ -57,6 +57,7 @@ exports.Image = mongoose.model("Image",ImageSchema);
 var MemeSchema = new mongoose.Schema({
   creatorId: {type:ObjectId, index:true, required:true, validate:isObjectId},
   templateId: {type:ObjectId, index:true, required:true, validate:isObjectId},
+  imageId: {type:ObjectId, required:true, validate:isObjectId},
   messages: [{
     valign: {type:String, required:true, validate:function(valign) {
       return valign == 'top' || valign == 'center' || valign == 'bottom';

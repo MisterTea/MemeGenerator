@@ -8,7 +8,36 @@ app.filter('usernameFromId', function() {
   };
 });
 
-app.filter('getAllFrameImageUrl',function() {
+app.filter('getMemeAllFramesImageUrl',function() {
+  return function(meme) {
+    if (meme.template) {
+      console.log("MEME TEMPLATE");
+      console.dir(meme.template);
+      return "/service/getMemeAllFrames/"+meme._id;
+    } else {
+      return "";
+    }
+  };
+});
+
+app.filter('getMemeFirstFrameImageUrl', function() {
+  return function(meme) {
+    if (meme.template) {
+      console.log("MEME TEMPLATE");
+      console.dir(meme.template);
+      if (meme.template.animated) {
+        console.log("MEME IS ANIMATED");
+        return "/service/getMemeFirstFrame/"+meme._id;
+      } else {
+        return "/service/getMemeAllFrames/"+meme._id;
+      }
+    } else {
+      return "";
+    }
+  };
+});
+
+app.filter('getTemplateAllFramesImageUrl',function() {
   return function(meme) {
     if (meme.template) {
       console.log("MEME TEMPLATE");
@@ -20,7 +49,7 @@ app.filter('getAllFrameImageUrl',function() {
   };
 });
 
-app.filter('getFirstFrameImageUrl', function() {
+app.filter('getTemplateFirstFrameImageUrl', function() {
   return function(meme) {
     if (meme.template) {
       console.log("MEME TEMPLATE");

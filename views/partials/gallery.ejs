@@ -2,7 +2,7 @@
   <div ng-repeat="meme in memes" class="col-md-4" style="margin-bottom: 50px;">
     <div class="col-md-12" style="padding: 5px 0px;">
       <a ng-href="/#/meme/{{meme._id}}">
-        <img style="width:100%;" ng-if="meme.template" normal-image="{{meme | getFirstFrameImageUrl}}" hover-image="{{meme | getAllFrameImageUrl}}"></img>
+        <img style="width:100%;" ng-if="meme.template" normal-image="{{meme | getMemeFirstFrameImageUrl}}" hover-image="{{meme | getMemeAllFramesImageUrl}}"></img>
       </a>
     </div>
     <div style="float:left;">

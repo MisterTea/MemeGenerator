@@ -87,17 +87,76 @@ router.post(
     rawMeme.templateId = rawMeme.template._id;
     delete rawMeme.template;
 
-    var meme = new Meme(rawMeme);
-    log.debug({text:"CREATING MEME:", meme:meme});
-
-    meme.save(function(err, innerMeme) {
-      log.debug({text:"CREATED MEME:", meme:innerMeme});
-      if (err) {
-        log.error(err);
+    // Fetch template
+    Template.findById(rawMeme.templateId, function(err, template) {
+      if (err || !template) {
         res.status(500).end();
-      } else {
-        res.status(200).type("application/json").send(JSON.stringify(innerMeme));
+        return;
       }
+
+      // Fetch image for template.  Fetch lean so we can clone.
+      Image.findById(template.imageId, function(err, image) {
+        if (err || !image) {
+          res.status(500).end();
+          return;
+        }
+
+        image = new Image({
+          data:image.data,
+          mime:image.mime,
+          firstFrameData:image.firstFrameData});
+
+        // Delete the id since we are going to make a new image based
+        // on this one.
+        delete image._id;
+
+        // Annotate image
+        var extension = image.mime.split('/')[1];
+        ImageHandler.annotate(image.data, extension, rawMeme.messages, function(annotatedImage) {
+          image.data = annotatedImage;
+
+          if (image.mime == 'image/gif') {
+            // Annotate first frame
+            ImageHandler.annotate(image.firstFrameData, 'png', rawMeme.messages, function(annotatedFirstFrameImage) {
+              console.log("GOT ANNOTATED GIF");
+              console.log(saveImage);
+              image.firstFrameData = annotatedFirstFrameImage;
+              saveImage();
+            });
+          } else {
+            console.log("GOT ANNOTATED IMAGE");
+            console.log(saveImage);
+            saveImage();
+          }
+        });
+
+        var saveImage = function() {
+          console.log("SAVING IMAGE");
+          image.save(function(err, newImage) {
+            if (err) {
+              log.error(err);
+              res.status(500).end();
+              return;
+            }
+
+            console.log("CREATING MEME");
+            rawMeme.imageId = newImage._id;
+            var meme = new Meme(rawMeme);
+            log.debug({text:"CREATING MEME:", meme:meme});
+
+            meme.save(function(err, innerMeme) {
+              log.debug({text:"CREATED MEME:", meme:innerMeme});
+              if (err) {
+                log.error(err);
+                res.status(500).end();
+              } else {
+                console.log("RETURNING MEME");
+                res.status(200).type("application/json").send(JSON.stringify(innerMeme));
+              }
+            });
+          });
+        };
+      });
     });
   }
 );
@@ -240,6 +299,64 @@ router.get(
       });
   }
 );
+
+router.get(
+  '/getMemeAllFrames/:id',
+  function(req,res) {
+    var id = req.param('id');
+    Meme.findById(id, function(err, meme) {
+      if (!meme) {
+        console.log("COULD NOT FIND MEME: " + id);
+        res.status(404).end();
+        return;
+      }
+      Template.findById(meme.templateId, function(err, template) {
+        Image.findById(meme.imageId, function(err,image) {
+          if (!image) {
+            res.status(500).end();
+            return;
+          }
+
+          var mime = image.mime;
+          var data = image.data;
+          var extension = mime.split('/')[1];
+
+          var filename = template.name + '.' + extension;
+          res.setHeader('Content-disposition', 'attachment; filename='+filename);
+          res.status(200).type(mime).send(data);
+        });
+      });
+    });
+  });
+
+router.get(
+  '/getMemeFirstFrame/:id',
+  function(req,res) {
+    var id = req.param('id');
+    Meme.findById(id, function(err, meme) {
+      if (!meme) {
+        console.log("COULD NOT FIND MEME: " + id);
+        res.status(404).end();
+        return;
+      }
+      Template.findById(meme.templateId, function(err, template) {
+        Image.findById(meme.imageId, function(err,image) {
+          if (!image) {
+            res.status(500).end();
+            return;
+          }
+
+          var mime = 'image/png';
+          var data = image.firstFrameData;
+          var extension = mime.split('/')[1];
+
+          var filename = template.name + '.' + extension;
+          res.setHeader('Content-disposition', 'attachment; filename='+filename);
+          res.status(200).type(mime).send(data);
+        });
+      });
+    });
+  });
 
 router.post(
   '/updateMeme/:id',

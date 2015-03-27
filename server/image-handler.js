@@ -32,8 +32,8 @@ exports.annotate = function(imageBuffer, extension, messages, callback) {
     var low = 1;
     var high = Math.max(18,height/4);
     var fontSize = high;
-    var numLettersCanFit = Math.floor((width/fontSize)*1.5);
-    console.log(numLettersCanFit + " " + longestToken);
+    var numLettersCanFit = Math.floor((width/fontSize)*2);
+    console.log(numLettersCanFit + " " + longestToken + " " + low + " " + high);
     if (true) {
       // Use bisection to get the right font size
       for (var a=0;a<50;a++) {
@@ -42,7 +42,7 @@ exports.annotate = function(imageBuffer, extension, messages, callback) {
         fontSize = mid;
 
         // You can fit 14 M's when (width/fontSize) == 10
-        numLettersCanFit = Math.floor((width/fontSize)*1.5);
+        numLettersCanFit = Math.floor((width/fontSize)*2);
 
         if (numLettersCanFit < longestToken) {
           high = mid;
@@ -51,9 +51,10 @@ exports.annotate = function(imageBuffer, extension, messages, callback) {
         }
       }
       fontSize = low;
-      numLettersCanFit = Math.floor((width/fontSize)*1.5);
+      numLettersCanFit = Math.floor((width/fontSize)*2);
     }
     console.log(fontSize);
+    fontSize /= tokens.length;
 
     return {text:content, fontSize:fontSize};
   };
