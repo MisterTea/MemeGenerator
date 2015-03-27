@@ -26,7 +26,7 @@ app.config(['$routeProvider',
         controller: 'CreateMemeController'
       }).
       otherwise({
-        redirectTo: '/top/daily'
+        redirectTo: '/top/weekly'
       });
   }]);
 
