@@ -4,21 +4,22 @@
       <img style="width:100%;" ng-if="meme.template" normal-image="{{meme | getFirstFrameImageUrl}}" hover-image="{{meme | getAllFrameImageUrl}}"></img>
     </div>
     <div style="float:left; padding: 2px 0px;">
-      <strong>{{meme.creator | usernameFromId}}</strong>
+      <small><strong>{{getUserFullName(meme.creatorId)}}</strong></small>
     </div>
     <div style="float: right; padding: 2px 5px;">
       <a href="#" ng-click="copyLink('/gallery.html#/meme/'+meme._id)" style="text-decoration: none;">
         <span class="glyphicon glyphicon-copy" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
       </a>
-      <a href="#" ng-click="copyLink('/gallery.html#/meme/'+meme._id)" style="text-decoration: none;">
+      <a ng-if="meme.context" ng-href="{{meme.context | addHttpToUrl}}" style="text-decoration: none;">
         <span class="glyphicon glyphicon-link" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
       </a>
+      <span class="glyphicon glyphicon-film" ng-if="meme.template.animated" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
     </div>
-    <div ng-style="{'float':'right', 'background-color':voteColor(meme._id), 'color':'white', 'border-radius': '15px',  'padding': '2px 5px'}">
+    <div ng-style="{'float':'right', 'background-color':voteColor(meme), 'color':'white', 'border-radius': '15px',  'padding': '2px 5px'}">
       <a href="" ng-click="vote(meme._id, false)" style="text-decoration: none;">
         <span class="glyphicon glyphicon-minus" ng-style="{'color': 'white', 'padding' : '0px 2px'}" aria-label="votedown"></span>
       </a>
-      <strong ng-style="{'color': 'white', 'padding' : '0px 2px', 'width':'30px'}">{{meme.votes.length}}</strong>
+      <strong ng-style="{'color': 'white', 'padding' : '0px 2px', 'width':'30px'}">{{(meme.numVotes)}}</strong>
       <a href="" ng-click="vote(meme._id, true)" style="text-decoration: none;">
         <span class="glyphicon glyphicon-plus" ng-style="{'color': 'white', 'padding' : '0px 2px'}" aria-label="voteup"></span>
       </a>
@@ -28,7 +29,7 @@
     <div class="panel panel-primary">
       <div class="panel-body" scroll-glue>
         <ul class="chat">
-          <li class="left clearfix" ng-repeat="chat in meme.chats">
+          <li class="left clearfix" ng-repeat="chat in meme.chatlog">
             <div class="chat-body clearfix">
               <div class="header">
                 <strong class="primary-font">{{chat.author | usernameFromId}}</strong>
@@ -37,7 +38,7 @@
                 </small>
               </div>
               <p>
-                <span ng-bind-html="chat.message | linkify"></span>
+                <span ng-bind-html="chat.content | linkify"></span>
               </p>
             </div>
           </li>
@@ -46,9 +47,9 @@
 
       <div class="panel-footer">
         <div class="input-group">
-          <input id="btn-input" type="text" class="form-control input" placeholder="Type your message here...">
+          <input id="btn-input" type="text" class="form-control input" ng-model="chatInput" placeholder="Type your message here...">
           <span class="input-group-btn">
-            <button class="btn btn-primary" id="btn-chat">
+            <button class="btn btn-primary" id="btn-chat" ng-click="addChat()">
               Send</button>
           </span>
         </div>

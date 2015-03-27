@@ -1,8 +1,8 @@
-<div>
+<div ng-controller="SideBarController">
   <ul class="nav nav-pills nav-stacked">
-    <li role="presentation"><a href="#/creatememe">Create Meme</a></li>
-    <li role="presentation" class="active"><a href="#/recent">Most Recent</a></li>
-    <li role="presentation"><a href="#/top/weekly">Top Weekly</a></li>
-    <li role="presentation"><a href="#/top/alltime">All-Star</a></li>
+    <li role="presentation" ng-class="{'active':onCreate}"><a href="#/creatememe">Create Meme</a></li>
+    <li role="presentation" ng-class="{'active':onRecent}"><a href="#/recent">Most Recent</a></li>
+    <li role="presentation" ng-class="{'active':onTopWeekly}"><a href="#/top/weekly">Top Weekly</a></li>
+    <li role="presentation" ng-class="{'active':onTopAllTime}"><a href="#/top/alltime">All-Star</a></li>
   </ul>
 </div>

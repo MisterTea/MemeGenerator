@@ -77,7 +77,7 @@ app.directive('relativeTime',
     '$filter',
     function($timeout, $filter) {
       return function(scope, element, attrs) {
-        var time = parseInt(attrs.relativeTime);
+        var time = attrs.relativeTime;
         var intervalLength = 1000 * 10; // 10 seconds
         var filter = $filter('fromNow');
         var timeoutId;
@@ -117,177 +117,15 @@ app.filter('trust', ['$sce', function($sce) {
   };
 }]);
 
-var createImage = function(messages, callback) {
-  WebFont.load({
-    custom: {
-      families: ['ImpactServer']
-    },
-    active: function() {
-      var img = document.createElement('img');
-      img.src = "/images/Templates/One-Does-Not-Simply.jpg";
-      img.onload = function() {
-        var imageWidth = img.naturalWidth;
-        var imageHeight = img.naturalHeight;
-        var canvas = document.createElement('canvas');
-        canvas.width = imageWidth;
-        canvas.height = imageHeight;
-        var context = canvas.getContext('2d');
-        context.drawImage(img,0,0);
-
-        var fontSize = 48;
-
-        var xValues = {
-          'topleft':10,
-          'middleleft':10,
-          'bottomleft':10,
-
-          'top':canvas.width/2,
-          'middle':canvas.width/2,
-          'bottom':canvas.width/2,
-
-          'topright':canvas.width - 10,
-          'middleright':canvas.width - 10,
-          'bottomright':canvas.width - 10
-        };
-        var yValues = {
-          'topleft':fontSize + 10,
-          'middleleft':canvas.height/2,
-          'bottomleft':canvas.height - 10,
-
-          'top':fontSize + 10,
-          'middle':canvas.height/2,
-          'bottom':canvas.height - 10,
-
-          'topright':fontSize + 10,
-          'middleright':canvas.height/2,
-          'bottomright':canvas.height - 10
-        };
-        var align = {
-          'topleft':'start',
-          'middleleft':'start',
-          'bottomleft':'start',
-
-          'top':'center',
-          'middle':'center',
-          'bottom':'center',
-
-          'topright':'end',
-          'middleright':'end',
-          'bottomright':'end'
-        };
-
-        var key;
-        for (key in messages) {
-          var x = xValues[key];
-          var y = yValues[key];
-          var text = messages[key];
-
-          context.font = fontSize+'px "ImpactServer"';
-          context.textAlign = align[key];
-          context.fillStyle = 'white';
-          context.strokeStyle = 'black';
-          context.lineWidth = 2;
-
-          // http://stackoverflow.com/questions/13627111/drawing-text-with-an-outer-stroke-with-html5s-canvas
-          context.miterLimit = 2;
-
-          context.fillText(text, x, y);
-          context.strokeText(text, x, y);
-
-          // get text metrics
-          var metrics = context.measureText(text);
-        }
-        //var width = metrics.width;
-        //context.font = '20pt Calibri';
-        //context.textAlign = 'center';
-        //context.fillStyle = '#555';
-        //context.fillText('(' + width + 'px wide)', x, y + 40);
-
-        // save canvas image as data url (png format by default)
-        var dataURL = canvas.toDataURL();
-
-        callback(dataURL, canvas.width, canvas.height);
-      };
-
+app.filter('addHttpToUrl', [function() {
+  return function(s) {
+    if (!s.match(/^[a-zA-Z]+:\/\//))
+    {
+      s = 'http://' + s;
     }
-  });
-};
-
-app.directive('memegallery', function($compile) {
-  var compile = function(element, attrs) {
-    return {
-      post: function(scope, element, attrs) {
-        console.log("POST");
-        console.dir(scope.meme);
-        createImage(scope.meme.messages, function(imageData, width, height) {
-          // set canvasImg image src to dataURL
-          // so it can be saved as an image
-          var canvasImage = element.find('img')[0];
-          var memeAnchor = element.find('a')[0];
-          //canvasImage.style.width = width;
-          //canvasImage.style.height = height;
-          canvasImage.src = imageData;
-          canvasImage.download = "meme.png";
-
-          //memeAnchor.href = imageData;
-          //memeAnchor.download = "meme.png";
-        });
-        console.dir(element.find('a')[0]);
-        console.dir(element.find('img')[0]);
-      }
-    };
+    return s;
   };
-
-  return {
-    compile: compile,
-    restrict: 'E',
-    scope: {
-      meme: '=info'
-    },
-    template:'<div class="col-md-12" style="padding: 5px 0px;">'+
-                 '<a ng-href="/#/meme/{{meme._id}}">'+
-                 '<img style="width:100%;" ng-src="{{meme.url}}"></img>'+
-                 '</a>'+
-                 '</div>'
-  };
-});
-
-app.directive('memedetail', function($compile) {
-  var compile = function(element, attrs) {
-        console.log("POST");
-        console.dir(attrs);
-        console.dir(element);
-
-        /*
-        createImage(scope.meme.messages, function(imageData, width, height) {
-          // set canvasImg image src to dataURL
-          // so it can be saved as an image
-          var canvasImage = element.find('img')[0];
-          var memeAnchor = element.find('a')[0];
-          //canvasImage.style.width = width;
-          //canvasImage.style.height = height;
-          canvasImage.src = imageData;
-          canvasImage.download = "meme.png";
-
-          memeAnchor.href = imageData;
-          memeAnchor.download = "meme.png";
-        });
-        console.dir(element.find('a')[0]);
-        console.dir(element.find('img')[0]);
-         */
-  };
-
-  return {
-    compile: compile,
-    restrict: 'E',
-    scope: {
-      meme: '=info'
-    },
-    template:'<div class="col-md-12" style="padding: 5px 0px;">'+
-                 '<img style="width:100%;" ng-src="{{meme.url}}"></img>'+
-                 '</div>'
-  };
-});
+}]);
 
 app.directive('hoverImage',function(){
   return {
@@ -311,115 +149,58 @@ app.directive('hoverImage',function(){
   };
 });
 
-var myself = {
-  voted: {'1':true},
-  downvoted: {'2':true}
-};
+var addMemeControls = function(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache) {
+  $scope.myself = null;
+  dataCache.get('myself', function(myself) {
+    $scope.myself = myself;
+  });
 
-var chats = [
-  {
-    '_id':'1',
-    'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
-    'timestamp':Date.now()
-  },
-  {
-    '_id':'1',
-    'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
-    'timestamp':Date.now()
-  },
-  {
-    '_id':'1',
-    'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
-    'timestamp':Date.now()
-  },
-  {
-    '_id':'1',
-    'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
-    'timestamp':Date.now()
-  },
-  {
-    '_id':'1',
-    'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
-    'timestamp':Date.now()
-  },
-  {
-    '_id':'1',
-    'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
-    'timestamp':Date.now()
-  },
-  {
-    '_id':'1',
-    'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
-    'timestamp':Date.now()
-  },
-  {
-    '_id':'1',
-    'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
-    'timestamp':Date.now()
-  },
-  {
-    '_id':'1',
-    'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
-    'timestamp':Date.now()
-  },
-  {
-    '_id':'1',
-    'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
-    'timestamp':Date.now()
-  },
-  {
-    '_id':'2',
-    'author':'123',
-    'message':'Hello world.  http://www.google.com.  www.google.com. #baller @10ghost',
-    'timestamp':Date.now()
-  }
-];
+  $scope.users = {};
+  $scope.getUserFullName = function(id) {
+    if (!id) {
+      return "Loading...";
+    }
 
-app.controller('MainGalleryController', ['dictionaryCache', '$scope', 'retryHttp', '$timeout', '$location', '$routeParams', 'dataCache', function(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache) {
-  var galleryType = $location.path().split('/')[1];
-  console.log(galleryType);
-  if (galleryType == 'recent') {
-    console.log("FETCHING");
-    retryHttp.get('/service/recent/0/30', function(data, status, headers, config) {
-      console.log("GOT MEMES");
-      console.dir(data);
-      async.map(data, function(meme, callback) {
-        dictionaryCache.get('template',meme.templateId,function(template) {
-          meme.template = template;
-          console.log("ADDED TEMPLATE");
-          console.dir(template);
-          callback(null, meme);
-        });
-      }, function(err, memesWithTemplates) {
-        $scope.memes = memesWithTemplates;
-      });
-    });
-  }
-
-  $scope.vote = function(memeId, up) {
-    // TODO: Hit server
-    console.log(memeId);
-    if (up) {
-      //$scope.memes[memeId].votes++;
+    if (id in $scope.users) {
+      console.log("CACHED USER " + $scope.users[id].fullName);
+      return $scope.users[id].fullName;
     } else {
-      //$scope.memes[memeId].votes--;
+      console.log("FETCHING USER");
+      dictionaryCache.get('user',id,function(user) {
+        console.log("GOT USER");
+        $scope.users[id] = user;
+      });
+      return "Loading...";
     }
   };
 
-  $scope.voteColor = function(memeId) {
-    if (memeId in myself.voted) {
+  $scope.vote = function(memeId, up) {
+    console.log(memeId);
+    retryHttp.post('/service/vote/'+memeId,{'up':up},function(newMeme) {
+      for (var a=0;a<$scope.memes.length;a++) {
+        console.log("REPLACING MEME");
+        if ($scope.memes[a]._id == newMeme._id) {
+          var template = $scope.memes[a].template;
+          $scope.memes[a] = newMeme;
+          $scope.memes[a].template = template;
+          break;
+        }
+      }
+    });
+  };
+
+  $scope.voteColor = function(meme) {
+    if (!meme) {
+      return 'grey';
+    }
+
+    console.log("MEME");
+    console.dir(meme);
+    console.log($scope.myself);
+
+    if (_.indexOf(meme.votes,$scope.myself._id)>-1) {
       return 'green';
-    } else if (memeId in myself.downvoted) {
+    } else if (meme.downvotes && _.indexOf(meme.downvotes,$scope.myself._id)>-1) {
       return 'red';
     } else {
       return 'grey';
@@ -434,9 +215,39 @@ app.controller('MainGalleryController', ['dictionaryCache', '$scope', 'retryHttp
                     $location.port() +
                     url);
   };
+};
+
+app.controller('MainGalleryController', ['dictionaryCache', '$scope', 'retryHttp', '$timeout', '$location', '$routeParams', 'dataCache', function(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache) {
+  var galleryType = $location.path();
+  console.log(galleryType);
+  var fetchUrl = null;
+  if (galleryType == '/recent') {
+    fetchUrl = '/service/recent/0/30';
+  } else if (galleryType == '/top/weekly') {
+    fetchUrl = '/service/top/weekly/0/30';
+  } else if (galleryType == '/top/alltime') {
+    fetchUrl = '/service/top/alltime/0/30';
+  }
+  console.log("FETCHING");
+  retryHttp.get(fetchUrl, function(data, status, headers, config) {
+    console.log("GOT MEMES");
+    console.dir(data);
+    async.map(data, function(meme, callback) {
+      dictionaryCache.get('template',meme.templateId,function(template) {
+        meme.template = template;
+        console.log("ADDED TEMPLATE");
+        console.dir(template);
+        callback(null, meme);
+      });
+    }, function(err, memesWithTemplates) {
+      $scope.memes = memesWithTemplates;
+    });
+  });
+
+  addMemeControls(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache);
 }]);
 
-app.controller('MainMemeController', ['$routeParams', '$scope', 'retryHttp', '$timeout', '$location', 'dictionaryCache', function($routeParams, $scope, retryHttp, $timeout, $location, dictionaryCache) {
+app.controller('MainMemeController', ['$routeParams', '$scope', 'retryHttp', '$timeout', '$location', 'dictionaryCache', 'dataCache', function($routeParams, $scope, retryHttp, $timeout, $location, dictionaryCache, dataCache) {
   retryHttp.get("/service/getMeme/"+$routeParams.memeId, function(result) {
     $scope.meme = result;
     dictionaryCache.get('template',$scope.meme.templateId,function(template) {
@@ -446,33 +257,17 @@ app.controller('MainMemeController', ['$routeParams', '$scope', 'retryHttp', '$t
     });
   });
 
-  $scope.vote = function(memeId, up) {
-    // TODO: Hit server
-    console.log(memeId);
-    if (up) {
-      $scope.meme.votes++;
-    } else {
-      $scope.meme.votes--;
-    }
-  };
+  addMemeControls(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache);
 
-  $scope.voteColor = function(memeId) {
-    if (memeId in myself.voted) {
-      return 'green';
-    } else if (memeId in myself.downvoted) {
-      return 'red';
-    } else {
-      return 'grey';
-    }
-  };
+  $scope.addChat = function() {
+    console.log("Adding chat: " + $scope.chatInput);
+    retryHttp.post("/service/addChat/"+$scope.meme._id, {chat:$scope.chatInput}, function(result) {
+      var template = $scope.meme.template;
+      $scope.meme = result;
+      $scope.meme.template = template;
+    });
+    $scope.chatInput = "";
 
-  $scope.copyLink = function(url) {
-    copyToClipboard($location.protocol() +
-                    "://" +
-                    $location.host() +
-                    ":" +
-                    $location.port() +
-                    url);
   };
 }]);
 

@@ -83,6 +83,7 @@ router.post(
     delete rawMeme._id;
     rawMeme.creatorId = req.user._id;
     rawMeme.votes = [req.user._id];
+    rawMeme.numVotes = 1;
     rawMeme.templateId = rawMeme.template._id;
     delete rawMeme.template;
 
@@ -101,6 +102,78 @@ router.post(
   }
 );
 
+router.post(
+  '/vote/:memeId',
+  function(req, res) {
+    if (!req.isAuthenticated()) {
+      res.status(403).end();
+      return;
+    }
+
+    var memeId = req.param('memeId');
+    var up = req.body.up;
+    console.log("VOTING: " + memeId + " " + up);
+
+    Meme.findById(memeId, function(err, meme) {
+      var iVote = _.findIndex(meme.votes, function(id) {
+        return id.toString() == req.user._id;
+      });
+      var iDownVote = _.findIndex(meme.downvotes, function(id) {
+        return id.toString() == req.user._id;
+      });
+      console.log(iVote + " / " + iDownVote);
+      if (iVote > -1) {
+        // voted
+        if (iDownVote > -1) {
+          // downvoted
+
+          // should never happen
+          meme.downvotes.splice(iDownVote,1);
+        } else {
+          if (up) {
+            // Redundant
+          } else {
+            // Remove vote
+            console.log("REMOVING VOTE " + iVote);
+            console.dir(meme.votes);
+            meme.votes.splice(iVote,1);
+            console.dir(meme.votes);
+          }
+        }
+      } else {
+        // didn't vote
+        if (iDownVote > -1) {
+          // downvoted
+          if (up) {
+            // remove downvote
+            meme.downvotes.splice(iDownVote,1);
+          } else {
+            // Redundant
+          }
+        } else {
+          // didn't downvote
+          if (up) {
+            meme.votes.push(req.user._id);
+          } else {
+            meme.downvotes.push(req.user._id);
+          }
+        }
+      }
+
+      meme.numVotes = meme.votes.length - meme.downvotes.length;
+      console.dir(meme);
+      meme.save(function(err, innerMeme) {
+        if (err) {
+          log.error(err);
+          res.status(500).end();
+        } else {
+          res.status(200).type("application/json").send(JSON.stringify(innerMeme));
+        }
+      });
+    });
+  }
+);
+
 router.get(
   '/recent/:offset/:size',
   function(req, res) {
@@ -110,6 +183,32 @@ router.get(
     Meme
       .find({})
       .sort('-creationTime')
+      .skip(offset)
+      .limit(size)
+      .exec(function(err, memes) {
+        if (err) {
+          res.status(500).end();
+          return;
+        }
+
+        res.status(200).type("application/json").send(JSON.stringify(memes));
+      });
+  }
+);
+
+router.get(
+  '/top/:dateRange/:offset/:size',
+  function(req, res) {
+    var dateRange = req.param('dateRange');
+    var offset = req.param('offset');
+    var size = req.param('size');
+
+    var query = Meme.find({});
+    if (dateRange == 'weekly') {
+      // 604800000 == milliseconds per week
+      query.where('creationTime').gt(Date.now() - 604800000);
+    }
+    query.sort('-numVotes')
       .skip(offset)
       .limit(size)
       .exec(function(err, memes) {
@@ -240,7 +339,7 @@ router.post(
 
     var chat = {
       creatorId:req.user._id,
-      content:req.body
+      content:req.body.chat
     };
 
     Meme.findById(
@@ -257,6 +356,25 @@ router.post(
         meme.save(function(err, innerMeme) {
           res.status(200).type("application/json").send(JSON.stringify(innerMeme));
         });
+      });
+  }
+);
+
+router.get(
+  '/getUser/:id',
+  function(req, res) {
+    var id = req.param('id');
+
+    User.findById(
+      id,
+      function(err, user) {
+        if (!user) {
+          log.warn({message:"TRIED TO GET UNKNOWN USER",user:req.user,id:id});
+          res.status(404).end();
+          return;
+        }
+
+        res.status(200).type("application/json").send(JSON.stringify(user));
       });
   }
 );

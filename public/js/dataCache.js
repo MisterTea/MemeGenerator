@@ -49,18 +49,27 @@ app.service('dataCache', ['retryHttp', '$log', '$timeout', function(retryHttp, $
 
 app.service('dictionaryCache', ['retryHttp', '$log', '$timeout', function(retryHttp, $log, $timeout) {
   var fetching = {
-    'template':{}
   };
   var cached = {
-    'template':{}
   };
   var fetch = {
     'template':function(key, callback) {
       retryHttp.get('/service/getTemplate/'+key, function(result) {
         callback(result);
       });
+    },
+    'user':function(key, callback) {
+      retryHttp.get('/service/getUser/'+key, function(result) {
+        callback(result);
+      });
     }
   };
+
+  var genre;
+  for (genre in fetch) {
+    fetching[genre] = {};
+    cached[genre] = {};
+  }
 
   // Get an item from the cache.  By default there is no
   // time-to-live.  Put 0 in ttl to always fetch from the server.
@@ -73,8 +82,8 @@ app.service('dictionaryCache', ['retryHttp', '$log', '$timeout', function(retryH
       return;
     }
 
-    if (key in cached && (ttl == null || cached[key].time >= (Date.now() - ttl*1000))) {
-      callback(cached[key].data);
+    if (key in cached[genre] && (ttl == null || cached[genre][key].time >= (Date.now() - ttl*1000))) {
+      callback(cached[genre][key].data);
       return;
     }
 

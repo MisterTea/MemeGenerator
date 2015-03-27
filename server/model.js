@@ -71,7 +71,9 @@ var MemeSchema = new mongoose.Schema({
     timestamp: {type: Date, default: Date.now, index:true, required:true},
     content: {type:String, index:true, required:true}
   }],
-  votes: {type:[ObjectId], required:true, validate:isObjectIdArray},
+  votes: {type:[ObjectId], index:true, validate:isObjectIdArray},
+  downvotes: {type:[ObjectId], default:[], index:true, validate:isObjectIdArray},
+  numVotes: {type:Number, index:true, required:true},
   context: {type:String, index:true},
   creationTime: {type: Date, default: Date.now, index:true}
 });

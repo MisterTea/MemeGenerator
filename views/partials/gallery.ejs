@@ -1,29 +1,30 @@
 <div>
   <div ng-repeat="meme in memes" class="col-md-4" style="margin-bottom: 50px;">
     <div class="col-md-12" style="padding: 5px 0px;">
-      <img style="width:100%;" ng-if="meme.template" normal-image="{{meme | getFirstFrameImageUrl}}" hover-image="{{meme | getAllFrameImageUrl}}"></img>
+      <a ng-href="/#/meme/{{meme._id}}">
+        <img style="width:100%;" ng-if="meme.template" normal-image="{{meme | getFirstFrameImageUrl}}" hover-image="{{meme | getAllFrameImageUrl}}"></img>
+      </a>
     </div>
     <div style="float:left;">
-      <small><strong>{{meme.creator | usernameFromId}}</strong></small>
+      <small><strong>{{getUserFullName(meme.creatorId)}}</strong></small>
     </div>
     <div style="float: right;">
       <a href="" ng-click="copyLink('/#/meme/'+meme._id)" style="text-decoration: none;">
         <span class="glyphicon glyphicon-copy" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
       </a>
-      <a href="" ng-click="copyLink('/#/meme/'+meme._id)" style="text-decoration: none;">
+      <a ng-if="meme.context" ng-href="{{meme.context | addHttpToUrl}}" style="text-decoration: none;">
         <span class="glyphicon glyphicon-link" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
       </a>
       <span class="glyphicon glyphicon-film" ng-if="meme.template.animated" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
     </div>
-    <div ng-style="{'float':'right', 'background-color':voteColor(meme._id), 'color':'white', 'border-radius': '10px'}">
+    <div ng-style="{'float':'right', 'background-color':voteColor(meme), 'color':'white', 'border-radius': '10px'}">
       <a href="" ng-click="vote(meme._id, false)" style="text-decoration: none;">
         <span class="glyphicon glyphicon-minus" ng-style="{'color': 'white', 'padding' : '0px 2px'}" aria-label="votedown"></span>
       </a>
-      <strong ng-style="{'color': 'white', 'padding' : '0px 2px', 'width':'30px'}">{{meme.votes.length}}</strong>
+      <strong ng-style="{'color': 'white', 'padding' : '0px 2px', 'width':'30px'}">{{(meme.numVotes)}}</strong>
       <a href="" ng-click="vote(meme._id, true)" style="text-decoration: none;">
         <span class="glyphicon glyphicon-plus" ng-style="{'color': 'white', 'padding' : '0px 2px'}" aria-label="voteup"></span>
       </a>
     </div>
   </div>
-</div>
 </div>
