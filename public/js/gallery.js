@@ -272,11 +272,11 @@ app.controller('MainMemeController', ['$routeParams', '$scope', 'retryHttp', '$t
   };
 }]);
 
-app.controller('CreateMemeController', ['dataCache', '$scope', 'retryHttp', '$timeout', '$location', '$sce', function(dataCache, $scope, retryHttp, $timeout, $location, $sce) {
-  dataCache.get('allTemplates', function(data) {
-    $scope.templates = $scope.allTemplates = data;
-  });
-  $scope.templateSelected = null;
+app.controller('CreateMemeController', ['dataCache', '$modal', '$scope', 'retryHttp', '$timeout', '$location', '$sce', function(dataCache, $modal, $scope, retryHttp, $timeout, $location, $sce) {
+  // Necessary so we can clear/restore meme.template to refresh the
+  // meme image
+  $scope.templateSelected = false;
+
   $scope.meme = {
     template:null,
     messages:[
@@ -348,21 +348,24 @@ app.controller('CreateMemeController', ['dataCache', '$scope', 'retryHttp', '$ti
     $scope.forceRefreshMeme();
   };
 
-  $scope.changeTemplate = function(item, model) {
-    $scope.templateSelected = item;
-  };
-
-  $scope.$watch('templateSelected', function(newValue, oldValue) {
+  $scope.templateName = {};
+  $scope.changeTemplate = function(item) {
+    console.log("MODEL");
+    console.dir($scope.templateName.selected);
+    console.dir($scope.$item);
+    if (item) {
+      $scope.templateSelected = true;
+    }
     console.log("NEW TEMPLATE");
-    console.log(newValue);
-    if (newValue) {
+    console.log(item);
+    if (item) {
       // Hacky way to force the meme directive to recompile
       $scope.meme.template = null;
       $timeout(function() {
-        $scope.meme.template = newValue;
+        $scope.meme.template = item;
       });
     }
-  });
+  };
 
   $scope.forceRefreshMeme = function() {
     var template = $scope.meme.template;
@@ -394,4 +397,116 @@ app.controller('CreateMemeController', ['dataCache', '$scope', 'retryHttp', '$ti
       $location.path("/meme/" + newMemeId);
     });
   };
+
+  $scope.createTemplateDialog = function() {
+    console.log("GOING TO CREATE TEMPLATE");
+    var modalInstance = $modal.open({
+      templateUrl: 'createTemplateModalContent.html',
+      controller: 'CreateTemplateModalInstanceCtrl',
+      resolve: {
+      }
+    });
+
+    modalInstance.result.then(function (newTemplate) {
+      $scope.allTemplates.push(newTemplate);
+      // TODO: Should we update the query here?
+      $scope.changeTemplate(newTemplate);
+      $scope.templateName.selected = newTemplate;
+    }, function () {
+      console.log('Modal dismissed at: ' + new Date());
+    });
+  };
+
+  dataCache.get('allTemplates', function(data) {
+    $scope.templates = $scope.allTemplates = data;
+    console.dir(data);
+    var initialTemplateId = $location.search()['templateId'];
+    if (initialTemplateId) {
+      for (var a=0;a<$scope.allTemplates.length;a++) {
+        if ($scope.allTemplates[a]._id == initialTemplateId) {
+          $scope.changeTemplate($scope.allTemplates[a]);
+          $scope.templateName.selected = $scope.allTemplates[a];
+          break;
+        }
+      }
+    }
+  });
 }]);
+
+app.controller('CreateTemplateModalInstanceCtrl', function (alertService, $scope, retryHttp, $modalInstance, $timeout) {
+  $scope.ok = function () {
+    var isValid=(function(){
+      var rg1=/^[^\\/:\*\?"<>\|]+$/; // forbidden characters \ / : * ? " < > |
+      var rg2=/^\./; // cannot start with dot (.)
+      var rg3=/^(nul|prn|con|lpt[0-9]|com[0-9])(\.|$)/i; // forbidden file names
+      return function isValid(fname){
+        return rg1.test(fname)&&!rg2.test(fname)&&!rg3.test(fname);
+      };
+    })();
+
+    if (!$scope.templateName || $scope.templateName.length==0) {
+      alertService.pushAlert('warning', 'Please add a template name', 5000);
+      return;
+    }
+    if (!$scope.mime) {
+      alertService.pushAlert('warning', 'Please drag an image from your computer to the dialog.', 5000);
+      return;
+    }
+    if (!isValid($scope.templateName)) {
+      alertService.pushAlert('warning', 'Invalid template name (must be a valid filename)', 5000);
+      return;
+    }
+
+    // Create the new template
+    retryHttp.post(
+      '/service/createTemplate',{
+        'name':$scope.templateName,
+        'base64':$scope.base64,
+        'mime':$scope.mime
+      }, function(result) {
+        $modalInstance.close(result);
+      });
+  };
+
+  $scope.cancel = function () {
+    $modalInstance.dismiss('cancel');
+  };
+
+  $timeout(function() {
+    console.log("SETTING UP FILEDROP");
+    // Tell FileDrop we can deal with iframe uploads using this URL:
+    var options = {input:false};
+
+    // Attach FileDrop to an area
+    var zone = new FileDrop('createTemplateModal', options);
+
+    // Do something when a user chooses or drops a file:
+    zone.event('send', function (files) {
+      // Depending on browser support files (FileList) might contain multiple items.
+      files.each(function (file) {
+        console.log(file);
+        //alert(file.name + ' ' + file.type + ' (' + file.size + ') bytes');
+        var fr = new FileReader();
+
+        // For some reason onload is being called 2x.
+        var called=false;
+        fr.onload = function(e) {
+          if (called) return;
+          called = true;
+          if(file.type.match(/image.*/)){
+            //console.log("SETTING FILE PARAMS");
+            $scope.$apply(function() {
+              $scope.mime = e.target.result.split(',')[0].substring(5).split(';')[0];
+              $scope.base64 = e.target.result.split(',')[1];
+              $scope.imageUri = 'data:'+$scope.mime+';base64,'+$scope.base64;
+              //console.log($scope.imageUri);
+            });
+          } else {
+            // Regular attachment (do nothing)
+          }
+        };
+        fr.readAsDataURL(file.nativeFile);
+      });
+    });
+  });
+});
