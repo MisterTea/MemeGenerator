@@ -30,9 +30,9 @@ exports.annotate = function(imageBuffer, extension, messages, callback) {
     }
 
     var low = 1;
-    var high = Math.max(18,height/4);
+    var high = Math.max(18,height/5);
     var fontSize = high;
-    var numLettersCanFit = Math.floor((width/fontSize)*2);
+    var numLettersCanFit = Math.floor((width/fontSize)*1.5);
     console.log(numLettersCanFit + " " + longestToken + " " + low + " " + high);
     if (true) {
       // Use bisection to get the right font size
@@ -42,7 +42,7 @@ exports.annotate = function(imageBuffer, extension, messages, callback) {
         fontSize = mid;
 
         // You can fit 14 M's when (width/fontSize) == 10
-        numLettersCanFit = Math.floor((width/fontSize)*2);
+        numLettersCanFit = Math.floor((width/fontSize)*1.5);
 
         if (numLettersCanFit < longestToken) {
           high = mid;
@@ -51,10 +51,11 @@ exports.annotate = function(imageBuffer, extension, messages, callback) {
         }
       }
       fontSize = low;
-      numLettersCanFit = Math.floor((width/fontSize)*2);
+      numLettersCanFit = Math.floor((width/fontSize)*1.5);
     }
+    console.log(numLettersCanFit + " " + longestToken + " " + low + " " + high);
     console.log(fontSize);
-    fontSize /= tokens.length;
+    fontSize /= Math.max(1.0, tokens.length / 2.0 );
 
     return {text:content, fontSize:fontSize};
   };
@@ -63,23 +64,30 @@ exports.annotate = function(imageBuffer, extension, messages, callback) {
     var finalText = content.text;
     var fontSize = content.fontSize;
 
-    var drawHeight = 0;
-    if (gravity.substring(0,5) == 'South') {
-      drawHeight = height/32;
-    } else if(gravity.substring(0,5) == 'North') {
-      drawHeight = 0;
-    }
-    var left = 0;
-    if (_.endsWith(gravity, "East") || _.endsWith(gravity, "West")) {
-      left = 10;
-    }
-    var border = fontSize/20;
+    var tokens = finalText.split(/\n+/);
 
-    return handler
-      .font("./Impact.ttf", fontSize)
-      .fill('white')
-      .stroke("black", border)
-      .drawText(left, drawHeight, finalText, gravity);
+    for (var a=0;a<tokens.length;a++) {
+      var drawHeight = 0;
+      if (gravity.substring(0,5) == 'South') {
+        drawHeight = (tokens.length-1-a)*(fontSize*7/8);
+      } else if(gravity.substring(0,5) == 'North') {
+        drawHeight = a*fontSize*7/8;
+      } else {
+        drawHeight = (a - (tokens.length-1)/2.0)*fontSize*7/8;
+      }
+      var left = 0;
+      if (_.endsWith(gravity, "East") || _.endsWith(gravity, "West")) {
+        left = 10;
+      }
+      var border = fontSize/20;
+
+      handler = handler
+        .font("./Impact.ttf", fontSize)
+        .fill('white')
+        .stroke("black", border)
+        .drawText(left, drawHeight, tokens[a], gravity);
+    }
+    return handler;
   };
 
   var handler = gm(imageBuffer, extension);
