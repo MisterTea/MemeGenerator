@@ -377,7 +377,7 @@ app.controller('CreateMemeController', ['dataCache', '$modal', '$scope', 'retryH
   };
 
   $scope.$watch('topContent', function(newValue, oldValue) {
-    if (newValue != newValue.toUpperCase()) {
+    if (newValue && newValue != newValue.toUpperCase()) {
       $scope.topContent = newValue.toUpperCase();
       return;
     }
@@ -385,7 +385,7 @@ app.controller('CreateMemeController', ['dataCache', '$modal', '$scope', 'retryH
     $scope.forceRefreshMeme();
   });
   $scope.$watch('middleContent', function(newValue, oldValue) {
-    if (newValue != newValue.toUpperCase()) {
+    if (newValue && newValue != newValue.toUpperCase()) {
       $scope.middleContent = newValue.toUpperCase();
       return;
     }
@@ -393,7 +393,7 @@ app.controller('CreateMemeController', ['dataCache', '$modal', '$scope', 'retryH
     $scope.forceRefreshMeme();
   });
   $scope.$watch('bottomContent', function(newValue, oldValue) {
-    if (newValue != newValue.toUpperCase()) {
+    if (newValue && newValue != newValue.toUpperCase()) {
       $scope.bottomContent = newValue.toUpperCase();
       return;
     }
