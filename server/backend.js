@@ -16,31 +16,38 @@ exports.createTemplate = function(name, data, mime, creatorId, callback) {
     1024, 1024,
     function(newData) {
 
-      // Start by saving the image
-      var image = new Image({
-        data: newData,
-        mime: mime
-      });
+      ImageHandler.maxSize(
+        newData,
+        mime.split('/')[1],
+        512, 512,
+        function(newData) {
 
-      image.save(function (err, innerImage) {
-        if (err) {
-          callback(err, null);
-          return;
-        }
+          // Start by saving the image
+          var image = new Image({
+            data: newData,
+            mime: mime
+          });
 
-        var template = new Template({
-          creatorId:creatorId,
-          name:name,
-          imageId:innerImage._id
+          image.save(function (err, innerImage) {
+            if (err) {
+              callback(err, null);
+              return;
+            }
+
+            var template = new Template({
+              creatorId:creatorId,
+              name:name,
+              imageId:innerImage._id
+            });
+
+            template.save(function (err, innerTemplate) {
+              if (err) {
+                callback(err, null);
+                return;
+              }
+              callback(null, innerTemplate);
+            });
+          });
         });
-
-        template.save(function (err, innerTemplate) {
-          if (err) {
-            callback(err, null);
-            return;
-          }
-          callback(null, innerTemplate);
-        });
-      });
     });
 };

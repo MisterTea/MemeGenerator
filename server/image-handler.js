@@ -171,3 +171,26 @@ exports.minSize = function(data, extension, width, height, callback) {
         });
     });
 };
+
+exports.maxSize = function(data, extension, width, height, callback) {
+  var handler = gm(data, extension);
+  handler
+    .size(function(err, value) {
+      if (value.width >= width && value.height >= height) {
+        // Image is already large enough
+        callback(data);
+        return;
+      }
+
+      handler
+        .resize(width, height)
+        .toBuffer(extension, function(err, buffer) {
+          if (err) {
+            callback(null);
+            return;
+          }
+
+          callback(buffer);
+        });
+    });
+};
