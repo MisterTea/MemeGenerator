@@ -14,6 +14,9 @@
         <span class="glyphicon glyphicon-link" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
       </a>
       <span class="glyphicon glyphicon-film" ng-if="memes[0].template.animated" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
+      <a href="" ng-if="createdByMyself(memes[0])" ng-click="deleteMeme(meme._id)" style="text-decoration: none;">
+        <span class="glyphicon glyphicon-remove" ng-style="{'padding' : '0px 2px', 'color' : 'red'}" aria-label="removememe"></span>
+      </a>
     </div>
     <div ng-style="{'float':'right', 'background-color':voteColor(memes[0]), 'color':'white', 'border-radius': '15px',  'padding': '2px 5px'}">
       <a href="" ng-click="vote(memes[0]._id, false)" style="text-decoration: none;">

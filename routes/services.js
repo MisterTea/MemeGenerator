@@ -426,8 +426,10 @@ router.post(
           return;
         }
 
-        if (meme.creatorId !== req.user._id) {
-          log.warn({message:"TRIED TO DELETE MEME WITHOUT ACCESS",user:req.user,meme:meme});
+        if (!meme.creatorId.equals(req.user._id)) {
+          console.dir(meme.creatorId);
+          console.dir(req.user._id);
+          log.warn({message:"TRIED TO DELETE MEME WITHOUT ACCESS",user:req.user_id,meme:meme.creatorId});
           res.status(403).end();
           return;
         }
@@ -438,7 +440,7 @@ router.post(
             res.status(500).end();
             return;
           }
-          res.status(200).end();
+          res.status(200).type("application/json").send(JSON.stringify(true));
         });
       });
   }

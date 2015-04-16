@@ -221,6 +221,13 @@ var addMemeControls = function(dictionaryCache, $scope, retryHttp, $timeout, $lo
       });
     }, 'image/png');
   };
+
+  $scope.createdByMyself = function(meme) {
+    if (!meme) {
+      return false;
+    }
+    return meme.creatorId == $scope.myself._id;
+  };
 };
 
 app.directive('selectOnLoad', function($timeout) {
@@ -287,6 +294,29 @@ app.controller('MainGalleryController', ['dictionaryCache', '$scope', 'retryHttp
   });
 
   addMemeControls(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache, $modal);
+
+  $scope.deleteMeme = function(memeId) {
+    var modalInstance = $modal.open({
+      templateUrl: 'deleteMemeModalContent.html',
+      controller: 'DeleteMemeModalInstanceCtrl',
+      resolve: {
+      }
+    });
+    modalInstance.result.then(function (newTemplate) {
+      retryHttp.post("/service/deleteMeme/"+$scope.memes[0]._id, {}, function(result) {
+        if (result) {
+          for (var a=0;a<$scope.memes.length;a++) {
+            if ($scope.memes[a]._id == memeId) {
+              $scope.memes.splice(a,1);
+              break;
+            }
+          }
+        }
+      });
+    }, function () {
+      console.log('Modal dismissed at: ' + new Date());
+    });
+  };
 }]);
 
 app.controller('MainMemeController', ['$routeParams', '$scope', 'retryHttp', '$timeout', '$location', 'dictionaryCache', 'dataCache', '$modal', function($routeParams, $scope, retryHttp, $timeout, $location, dictionaryCache, dataCache, $modal) {
@@ -314,6 +344,24 @@ app.controller('MainMemeController', ['$routeParams', '$scope', 'retryHttp', '$t
 
   addMemeControls(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache, $modal);
 
+  $scope.deleteMeme = function(memeId) {
+    var modalInstance = $modal.open({
+      templateUrl: 'deleteMemeModalContent.html',
+      controller: 'DeleteMemeModalInstanceCtrl',
+      resolve: {
+      }
+    });
+    modalInstance.result.then(function (newTemplate) {
+      retryHttp.post("/service/deleteMeme/"+$scope.memes[0]._id, {}, function(result) {
+        if (result) {
+          $location.path("/recent");
+        }
+      });
+    }, function () {
+      console.log('Modal dismissed at: ' + new Date());
+    });
+  };
+
   $scope.addChat = function() {
     console.log("Adding chat: " + $scope.chatInput);
     retryHttp.post("/service/addChat/"+$scope.memes[0]._id, {chat:$scope.chatInput}, function(result) {
@@ -325,6 +373,15 @@ app.controller('MainMemeController', ['$routeParams', '$scope', 'retryHttp', '$t
 
   };
 }]);
+
+app.controller('DeleteMemeModalInstanceCtrl', function (alertService, $scope, retryHttp, $modalInstance, $timeout) {
+  $scope.yes = function () {
+    $modalInstance.close();
+  };
+  $scope.no = function() {
+    $modalInstance.dismiss('cancel');
+  };
+});
 
 app.controller('CreateMemeController', ['dataCache', '$modal', '$scope', 'retryHttp', '$timeout', '$location', '$sce', function(dataCache, $modal, $scope, retryHttp, $timeout, $location, $sce) {
   // Necessary so we can clear/restore meme.template to refresh the

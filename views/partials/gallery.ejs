@@ -27,6 +27,9 @@
             <span class="glyphicon glyphicon-link" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
           </a>
           <span class="glyphicon glyphicon-film" ng-if="meme.template.animated" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
+          <a href="" ng-if="createdByMyself(meme)" ng-click="deleteMeme(meme._id)" style="text-decoration: none;">
+            <span class="glyphicon glyphicon-remove" ng-style="{'padding' : '0px 2px', 'color' : 'red'}" aria-label="removememe"></span>
+          </a>
         </div>
       </div>
       <div style="height:50px"></div>
