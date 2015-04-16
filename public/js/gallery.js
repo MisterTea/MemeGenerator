@@ -1,18 +1,8 @@
-function copyToClipboard(text) {
-  window.prompt("Copy HTML to clipboard: Ctrl+C, Enter", text);
-}
-
-app.filter('usernameFromId', function() {
-  return function(input) {
-    return 'Jason Gauci';
-  };
-});
+var app = app;
 
 app.filter('getMemeAllFramesImageUrl',function() {
   return function(meme) {
     if (meme.template) {
-      console.log("MEME TEMPLATE");
-      console.dir(meme.template);
       return "/service/getMemeAllFrames/"+meme._id;
     } else {
       return "";
@@ -23,10 +13,7 @@ app.filter('getMemeAllFramesImageUrl',function() {
 app.filter('getMemeFirstFrameImageUrl', function() {
   return function(meme) {
     if (meme.template) {
-      console.log("MEME TEMPLATE");
-      console.dir(meme.template);
       if (meme.template.animated) {
-        console.log("MEME IS ANIMATED");
         return "/service/getMemeFirstFrame/"+meme._id;
       } else {
         return "/service/getMemeAllFrames/"+meme._id;
@@ -40,8 +27,6 @@ app.filter('getMemeFirstFrameImageUrl', function() {
 app.filter('getTemplateAllFramesImageUrl',function() {
   return function(meme) {
     if (meme.template) {
-      console.log("MEME TEMPLATE");
-      console.dir(meme.template);
       return "/service/getTemplateAllFrames/"+meme.template._id+"?messages="+Base64.encode(JSON.stringify(meme.messages));
     } else {
       return "";
@@ -52,10 +37,7 @@ app.filter('getTemplateAllFramesImageUrl',function() {
 app.filter('getTemplateFirstFrameImageUrl', function() {
   return function(meme) {
     if (meme.template) {
-      console.log("MEME TEMPLATE");
-      console.dir(meme.template);
       if (meme.template.animated) {
-        console.log("MEME IS ANIMATED");
         return "/service/getTemplateFirstFrame/"+meme.template._id+"?messages="+Base64.encode(JSON.stringify(meme.messages));
       } else {
         return "/service/getTemplateAllFrames/"+meme.template._id+"?messages="+Base64.encode(JSON.stringify(meme.messages));
