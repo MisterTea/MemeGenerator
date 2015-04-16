@@ -1,26 +1,26 @@
 <div>
-  <div class="col-md-6">
+  <div class="col-md-6" ng-if="memes[0]">
     <div class="col-md-12" style="padding: 5px 0px;">
-      <img style="width:100%;" ng-if="meme.template" ng-src="{{meme | getMemeAllFramesImageUrl}}"></img>
+      <img style="width:100%;" ng-if="memes[0].template" ng-src="{{memes[0] | getMemeAllFramesImageUrl}}"></img>
     </div>
     <div style="float:left; padding: 2px 0px;">
-      <small><strong>{{getUserFullName(meme.creatorId)}}</strong></small>
+      <small><strong>{{getUserFullName(memes[0].creatorId)}}</strong></small>
     </div>
     <div style="float: right; padding: 2px 5px;">
-      <a href="" ng-click="createEmbeddedHtml(meme._id)" style="text-decoration: none;">
+      <a href="" ng-click="createEmbeddedHtml(memes[0]._id)" style="text-decoration: none;">
         <span class="glyphicon glyphicon-copy" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
       </a>
-      <a ng-if="meme.context" ng-href="{{meme.context | addHttpToUrl}}" style="text-decoration: none;">
+      <a ng-if="memes[0].context" ng-href="{{memes[0].context | addHttpToUrl}}" style="text-decoration: none;">
         <span class="glyphicon glyphicon-link" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
       </a>
-      <span class="glyphicon glyphicon-film" ng-if="meme.template.animated" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
+      <span class="glyphicon glyphicon-film" ng-if="memes[0].template.animated" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
     </div>
-    <div ng-style="{'float':'right', 'background-color':voteColor(meme), 'color':'white', 'border-radius': '15px',  'padding': '2px 5px'}">
-      <a href="" ng-click="vote(meme._id, false)" style="text-decoration: none;">
+    <div ng-style="{'float':'right', 'background-color':voteColor(memes[0]), 'color':'white', 'border-radius': '15px',  'padding': '2px 5px'}">
+      <a href="" ng-click="vote(memes[0]._id, false)" style="text-decoration: none;">
         <span class="glyphicon glyphicon-minus" ng-style="{'color': 'white', 'padding' : '0px 2px'}" aria-label="votedown"></span>
       </a>
-      <strong ng-style="{'color': 'white', 'padding' : '0px 2px', 'width':'30px'}">{{(meme.numVotes)}}</strong>
-      <a href="" ng-click="vote(meme._id, true)" style="text-decoration: none;">
+      <strong ng-style="{'color': 'white', 'padding' : '0px 2px', 'width':'30px'}">{{(memes[0].numVotes)}}</strong>
+      <a href="" ng-click="vote(memes[0]._id, true)" style="text-decoration: none;">
         <span class="glyphicon glyphicon-plus" ng-style="{'color': 'white', 'padding' : '0px 2px'}" aria-label="voteup"></span>
       </a>
     </div>
@@ -31,10 +31,10 @@
 
       <div class="panel-body" scroll-glue>
         <ul class="chat">
-          <li class="left clearfix" ng-repeat="chat in meme.chatlog">
+          <li class="left clearfix" ng-repeat="chat in memes[0].chatlog">
             <div class="chat-body clearfix">
               <div class="header">
-                <strong class="primary-font">{{chat.author | usernameFromId}}</strong>
+                <strong class="primary-font">{{getUserFullName(chat.creatorId)}}</strong>
                 <small class="pull-right text-muted" style="margin: 0px 0px;">
                   <span class="glyphicon glyphicon-time"></span><span relative-time="{{chat.timestamp}}"></span>
                 </small>

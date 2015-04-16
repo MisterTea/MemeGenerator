@@ -165,6 +165,9 @@ var addMemeControls = function(dictionaryCache, $scope, retryHttp, $timeout, $lo
   $scope.memes = [];
   $scope.users = {};
   $scope.getUserFullName = function(id) {
+    if (!id) {
+      return "Loading...";
+    }
     return $scope.users[id].fullName;
   };
 
@@ -187,10 +190,6 @@ var addMemeControls = function(dictionaryCache, $scope, retryHttp, $timeout, $lo
     if (!meme) {
       return 'grey';
     }
-
-    console.log("MEME");
-    console.dir(meme);
-    console.log($scope.myself);
 
     if (_.indexOf(meme.votes,$scope.myself._id)>-1) {
       return 'green';
@@ -282,6 +281,7 @@ app.controller('MainGalleryController', ['dictionaryCache', '$scope', 'retryHttp
         for (var a=0;a<users.length;a++) {
           $scope.users[users[a]._id] = users[a];
         }
+        $scope.$apply();
       });
     });
   });
@@ -294,10 +294,19 @@ app.controller('MainMemeController', ['$routeParams', '$scope', 'retryHttp', '$t
     dictionaryCache.get('template',result.templateId,function(template) {
       var meme = result;
       meme.template = template;
-      console.log("ADDED TEMPLATE");
-      console.dir(template);
-      dictionaryCache.get('user',id,function(user) {
-        $scope.users[user._id] = user;
+      var usersToFetch = [meme.creatorId];
+      for (var a=0;a<meme.chatlog.length;a++) {
+        usersToFetch.push(meme.chatlog[a].creatorId);
+      }
+      usersToFetch = _.uniq(usersToFetch);
+      async.map(usersToFetch, function(id, callback) {
+        dictionaryCache.get('user',id,function(user) {
+          callback(null, user);
+        });
+      }, function(err, users) {
+        for (var a=0;a<users.length;a++) {
+          $scope.users[users[a]._id] = users[a];
+        }
         $scope.memes = [meme];
       });
     });
