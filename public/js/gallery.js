@@ -426,37 +426,41 @@ app.controller('CreateMemeController', ['dataCache', '$modal', '$scope', 'retryH
     }
   };
 
+  var refreshSemaphore=0;
   $scope.forceRefreshMeme = function() {
-    var template = $scope.meme.template;
-    // Hacky way to force the meme directive to recompile
-    $scope.meme.template = null;
+    refreshSemaphore++;
     $timeout(function() {
-      $scope.meme.template = template;
-    });
+      refreshSemaphore--;
+      if (refreshSemaphore==0) {
+        var template = $scope.meme.template;
+        // Hacky way to force the meme directive to recompile
+        $scope.meme.template = null;
+        $timeout(function() {
+          $scope.meme.template = template;
+        });
+      }
+    }, 500);
   };
 
   $scope.$watch('topContent', function(newValue, oldValue) {
-    if (newValue && newValue != newValue.toUpperCase()) {
-      $scope.topContent = newValue.toUpperCase();
-      return;
+    if (!newValue) {
+      newValue = "";
     }
-    $scope.meme.messages[0]['content'] = newValue;
+    $scope.meme.messages[0]['content'] = newValue.toUpperCase();
     $scope.forceRefreshMeme();
   });
   $scope.$watch('middleContent', function(newValue, oldValue) {
-    if (newValue && newValue != newValue.toUpperCase()) {
-      $scope.middleContent = newValue.toUpperCase();
-      return;
+    if (!newValue) {
+      newValue = "";
     }
-    $scope.meme.messages[1]['content'] = newValue;
+    $scope.meme.messages[1]['content'] = newValue.toUpperCase();
     $scope.forceRefreshMeme();
   });
   $scope.$watch('bottomContent', function(newValue, oldValue) {
-    if (newValue && newValue != newValue.toUpperCase()) {
-      $scope.bottomContent = newValue.toUpperCase();
-      return;
+    if (!newValue) {
+      newValue = "";
     }
-    $scope.meme.messages[2]['content'] = newValue;
+    $scope.meme.messages[2]['content'] = newValue.toUpperCase();
     $scope.forceRefreshMeme();
   });
 
