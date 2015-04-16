@@ -20,7 +20,7 @@
               <span class="glyphicon glyphicon-plus" ng-style="{'color': 'white', 'padding' : '0px 2px'}" aria-label="voteup"></span>
             </a>
           </div>
-          <a href="" ng-click="copyLink('/#/meme/'+meme._id)" style="text-decoration: none;">
+          <a href="" ng-click="createEmbeddedHtml(meme._id)" style="text-decoration: none;">
             <span class="glyphicon glyphicon-copy" ng-style="{'padding' : '0px 2px'}" aria-label="copylink"></span>
           </a>
           <a ng-if="meme.context" ng-href="{{meme.context | addHttpToUrl}}" style="text-decoration: none;">

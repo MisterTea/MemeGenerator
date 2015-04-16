@@ -26,6 +26,25 @@
       </div>
     </div>
 
+    <script type="text/ng-template" id="copyMemeModalContent.html">
+      <div id="createTemplateModal">
+        <div class="modal-header">
+          <h3 class="modal-title">Copy the following code to embed this meme in an email/website</h3>
+        </div>
+        <div class="modal-body">
+          <textarea
+             class="form-control"
+             rows="10"
+             ng-model="embedText"
+             select-on-load>
+          </textarea>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" ng-click="ok()">OK</button>
+        </div>
+      </div>
+    </script>
+
     <% include footer %>
   </body>
 </html>

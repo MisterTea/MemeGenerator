@@ -1,5 +1,5 @@
 function copyToClipboard(text) {
-  window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+  window.prompt("Copy HTML to clipboard: Ctrl+C, Enter", text);
 }
 
 app.filter('usernameFromId', function() {
@@ -150,7 +150,31 @@ app.directive('hoverImage',function(){
   };
 });
 
-var addMemeControls = function(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache) {
+/**
+ * Convert an image
+ * to a base64 url
+ * @param  {String}   url
+ * @param  {Function} callback
+ * @param  {String}   [outputFormat=image/png]
+ */
+function convertImgToBase64URL(url, callback, outputFormat){
+    var canvas = document.createElement('CANVAS'),
+        ctx = canvas.getContext('2d'),
+        img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = function(){
+        var dataURL;
+        canvas.height = img.height;
+        canvas.width = img.width;
+        ctx.drawImage(img, 0, 0);
+        dataURL = canvas.toDataURL(outputFormat);
+        callback(dataURL);
+        canvas = null;
+    };
+    img.src = url;
+}
+
+var addMemeControls = function(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache, $modal) {
   $scope.myself = null;
   dataCache.get('myself', function(myself) {
     $scope.myself = myself;
@@ -208,17 +232,52 @@ var addMemeControls = function(dictionaryCache, $scope, retryHttp, $timeout, $lo
     }
   };
 
-  $scope.copyLink = function(url) {
-    copyToClipboard($location.protocol() +
+  $scope.createEmbeddedHtml = function(memeId) {
+    var baseUrl = $location.protocol() +
                     "://" +
                     $location.host() +
                     ":" +
-                    $location.port() +
-                    url);
+                    $location.port();
+    var imgUrl = baseUrl + "/service/getMemeAllFrames/" + memeId;
+    var anchorUrl = baseUrl + '/view#/meme/' + memeId;
+    convertImgToBase64URL(imgUrl, function(base64Img) {
+      var embedText = "<a href=\""+anchorUrl+"\"><img src=\""+base64Img+"\"></img></a>";
+      var modalInstance = $modal.open({
+        templateUrl: 'copyMemeModalContent.html',
+        controller: 'CopyMemeModalInstanceCtrl',
+        resolve: {
+          embedText: function() {
+            return embedText;
+          }
+        }
+      });
+    }, 'image/png');
   };
 };
 
-app.controller('MainGalleryController', ['dictionaryCache', '$scope', 'retryHttp', '$timeout', '$location', '$routeParams', 'dataCache', function(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache) {
+app.directive('selectOnLoad', function($timeout) {
+  return {
+    restrict: 'A',
+    link: function (scope, element, attrs) {
+      $timeout(function() {
+        console.log("ELEMENT");
+        console.dir(element[0]);
+        element[0].select();
+      }, 100);
+    }
+  };
+});
+
+app.controller('CopyMemeModalInstanceCtrl', function (alertService, $scope, retryHttp, $modalInstance, $timeout, embedText) {
+  $scope.ok = function () {
+    $modalInstance.close();
+  };
+  console.log("EMBED TEXT");
+  console.dir(embedText);
+  $scope.embedText = embedText;
+});
+
+app.controller('MainGalleryController', ['dictionaryCache', '$scope', 'retryHttp', '$timeout', '$location', '$routeParams', 'dataCache', '$modal', function(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache, $modal) {
   var galleryType = $location.path();
   console.log(galleryType);
   var fetchUrl = null;
@@ -245,10 +304,10 @@ app.controller('MainGalleryController', ['dictionaryCache', '$scope', 'retryHttp
     });
   });
 
-  addMemeControls(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache);
+  addMemeControls(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache, $modal);
 }]);
 
-app.controller('MainMemeController', ['$routeParams', '$scope', 'retryHttp', '$timeout', '$location', 'dictionaryCache', 'dataCache', function($routeParams, $scope, retryHttp, $timeout, $location, dictionaryCache, dataCache) {
+app.controller('MainMemeController', ['$routeParams', '$scope', 'retryHttp', '$timeout', '$location', 'dictionaryCache', 'dataCache', '$modal', function($routeParams, $scope, retryHttp, $timeout, $location, dictionaryCache, dataCache, $modal) {
   retryHttp.get("/service/getMeme/"+$routeParams.memeId, function(result) {
     $scope.meme = result;
     dictionaryCache.get('template',$scope.meme.templateId,function(template) {
@@ -258,7 +317,7 @@ app.controller('MainMemeController', ['$routeParams', '$scope', 'retryHttp', '$t
     });
   });
 
-  addMemeControls(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache);
+  addMemeControls(dictionaryCache, $scope, retryHttp, $timeout, $location, $routeParams, dataCache, $modal);
 
   $scope.addChat = function() {
     console.log("Adding chat: " + $scope.chatInput);
