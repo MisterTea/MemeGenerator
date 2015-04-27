@@ -114,12 +114,22 @@ router.post(
         var extension = image.mime.split('/')[1];
         ImageHandler.annotate(image.data, extension, rawMeme.messages, function(annotatedImage) {
           image.data = annotatedImage;
+          if (!annotatedImage) {
+            console.log("ERROR");
+            res.status(500).end();
+            return;
+          }
 
           if (image.mime == 'image/gif') {
             // Annotate first frame
             ImageHandler.annotate(image.firstFrameData, 'png', rawMeme.messages, function(annotatedFirstFrameImage) {
               console.log("GOT ANNOTATED GIF");
               console.log(saveImage);
+              if (!annotatedFirstFrameImage) {
+                console.log("ERROR");
+                res.status(500).end();
+                return;
+              }
               image.firstFrameData = annotatedFirstFrameImage;
               saveImage();
             });
@@ -174,6 +184,10 @@ router.post(
     console.log("VOTING: " + memeId + " " + up);
 
     Meme.findById(memeId, function(err, meme) {
+      if (!meme) {
+        res.status(404).end();
+        return;
+      }
       var iVote = _.findIndex(meme.votes, function(id) {
         return id.toString() == req.user._id;
       });

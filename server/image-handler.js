@@ -95,6 +95,7 @@ exports.annotate = function(imageBuffer, extension, messages, callback) {
     .size(function(err, value) {
       if (err) {
         console.log("Error: " + err);
+        callback(null);
         return;
       }
       console.dir(value);

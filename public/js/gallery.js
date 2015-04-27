@@ -496,23 +496,26 @@ app.controller('CreateMemeController', ['dataCache', '$modal', '$scope', 'retryH
 
   $scope.$watch('topContent', function(newValue, oldValue) {
     if (!newValue) {
-      newValue = "";
+      $scope.meme.messages[0]['content'] = "";
+    } else {
+      $scope.meme.messages[0]['content'] = newValue.toUpperCase();
     }
-    $scope.meme.messages[0]['content'] = newValue.toUpperCase();
     $scope.forceRefreshMeme();
   });
   $scope.$watch('middleContent', function(newValue, oldValue) {
     if (!newValue) {
-      newValue = "";
+      $scope.meme.messages[1]['content'] = "";
+    } else {
+      $scope.meme.messages[1]['content'] = newValue.toUpperCase();
     }
-    $scope.meme.messages[1]['content'] = newValue.toUpperCase();
     $scope.forceRefreshMeme();
   });
   $scope.$watch('bottomContent', function(newValue, oldValue) {
     if (!newValue) {
-      newValue = "";
+      $scope.meme.messages[2]['content'] = "";
+    } else {
+      $scope.meme.messages[2]['content'] = newValue.toUpperCase();
     }
-    $scope.meme.messages[2]['content'] = newValue.toUpperCase();
     $scope.forceRefreshMeme();
   });
 

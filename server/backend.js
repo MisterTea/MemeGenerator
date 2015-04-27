@@ -13,7 +13,7 @@ exports.createTemplate = function(name, data, mime, creatorId, callback) {
   ImageHandler.minSize(
     data,
     mime.split('/')[1],
-    1024, 1024,
+    512, 512,
     function(newData) {
 
       ImageHandler.maxSize(
@@ -34,18 +34,32 @@ exports.createTemplate = function(name, data, mime, creatorId, callback) {
               return;
             }
 
-            var template = new Template({
-              creatorId:creatorId,
-              name:name,
-              imageId:innerImage._id
-            });
-
-            template.save(function (err, innerTemplate) {
-              if (err) {
-                callback(err, null);
+            ImageHandler.getFirstFrameOfGif(image.data, function(firstFrameData) {
+              if (!firstFrameData) {
+                callback("Could not create first frame", null);
                 return;
               }
-              callback(null, innerTemplate);
+              image.firstFrameData = firstFrameData;
+              data = firstFrameData;
+              image.save(function(err, innerImage) {
+                if (err) {
+                  callback("Could not create first frame", null);
+                  return;
+                }
+                var template = new Template({
+                  creatorId:creatorId,
+                  name:name,
+                  imageId:innerImage._id
+                });
+
+                template.save(function (err, innerTemplate) {
+                  if (err) {
+                    callback(err, null);
+                    return;
+                  }
+                  callback(null, innerTemplate);
+                });
+              });
             });
           });
         });
