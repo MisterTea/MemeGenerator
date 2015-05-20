@@ -315,6 +315,32 @@ router.get(
 );
 
 router.get(
+  '/getMemeUriAllFrames/:id',
+  function(req,res) {
+    var id = req.param('id');
+    Meme.findById(id, function(err, meme) {
+      if (!meme) {
+        console.log("COULD NOT FIND MEME: " + id);
+        res.status(404).end();
+        return;
+      }
+      Template.findById(meme.templateId, function(err, template) {
+        Image.findById(meme.imageId, function(err,image) {
+          if (!image) {
+            res.status(500).end();
+            return;
+          }
+
+          var mime = image.mime;
+          var dataB64 = image.data.toString('base64');
+
+          res.status(200).send('data:' + mime + ";base64," + dataB64);
+        });
+      });
+    });
+  });
+
+router.get(
   '/getMemeAllFrames/:id',
   function(req,res) {
     var id = req.param('id');

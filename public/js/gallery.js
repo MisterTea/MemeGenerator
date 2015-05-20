@@ -202,24 +202,29 @@ var addMemeControls = function(dictionaryCache, $scope, retryHttp, $timeout, $lo
 
   $scope.createEmbeddedHtml = function(memeId) {
     var baseUrl = $location.protocol() +
-                    "://" +
-                    $location.host() +
-                    ":" +
-                    $location.port();
-    var imgUrl = baseUrl + "/service/getMemeAllFrames/" + memeId;
-    var anchorUrl = baseUrl + '/view#/meme/' + memeId;
-    convertImgToBase64URL(imgUrl, function(base64Img) {
-      var embedText = "<a href=\""+anchorUrl+"\"><img src=\""+base64Img+"\"></img></a>";
-      var modalInstance = $modal.open({
-        templateUrl: 'copyMemeModalContent.html',
-        controller: 'CopyMemeModalInstanceCtrl',
-        resolve: {
-          embedText: function() {
-            return embedText;
+          "://" +
+          $location.host() +
+          ":" +
+          $location.port();
+    retryHttp.get(
+      baseUrl + "/service/getMemeUriAllFrames/" + memeId,
+      function(data, status, headers, config) {
+        var base64Img = data;
+        var anchorUrl = baseUrl + '/view#/meme/' + memeId;
+        var embedText = "<a href=\""+anchorUrl+"\"><img src=\""+base64Img+"\"></img></a>";
+        var modalInstance = $modal.open({
+          templateUrl: 'copyMemeModalContent.html',
+          controller: 'CopyMemeModalInstanceCtrl',
+          resolve: {
+            embedText: function() {
+              return embedText;
+            }
           }
-        }
+        });
+      },
+      function(data, status, headers, config) {
+        // TODO: Handle error
       });
-    }, 'image/png');
   };
 
   $scope.createdByMyself = function(meme) {
