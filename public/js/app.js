@@ -1,5 +1,5 @@
 app = angular.module('MemeGenerator', [
-  'angularBootstrapNavTree', 'ngErrorShipper', 'ui.bootstrap', 'ngRoute', 'luegg.directives', 'ui.select']);
+  'angularBootstrapNavTree', 'ngErrorShipper', 'ui.bootstrap', 'ngRoute', 'luegg.directives', 'ui.select', 'wu.masonry']);
 
 app.config(function($routeProvider, $locationProvider) {
   $routeProvider.
