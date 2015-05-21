@@ -343,7 +343,7 @@ app.controller('MainGalleryController', ['dictionaryCache', '$scope', 'retryHttp
       }
     });
     modalInstance.result.then(function (newTemplate) {
-      retryHttp.post("/service/deleteMeme/"+$scope.memes[0]._id, {}, function(result) {
+      retryHttp.post("/service/deleteMeme/"+memeId, {}, function(result) {
         if (result) {
           for (var a=0;a<$scope.memes.length;a++) {
             if ($scope.memes[a]._id == memeId) {
