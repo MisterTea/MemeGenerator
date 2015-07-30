@@ -327,7 +327,9 @@ app.controller('MainGalleryController', ['dictionaryCache', '$scope', 'retryHttp
             $scope.users[users[a]._id] = users[a];
           }
           console.log("Showing gallery");
-          $scope.$apply();
+          if(!$scope.$$phase) {
+            $scope.$apply();
+          }
         });
       });
     });

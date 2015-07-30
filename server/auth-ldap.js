@@ -24,4 +24,3 @@ exports.login = function(uid,password,successCallback,errorCallback) {
     });
   });
 };
-

@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node server/server.js --optionsFile=options_example.json | bunyan",
-    "UpdateLDAP": "node tools/UpdateLDAP.js --optionsFile=options_example.json | bunyan",
+    "start": "node server/server.js --optionsFile=options_example.json | ./node_modules/.bin/bunyan",
+    "UpdateLDAP": "node tools/UpdateLDAP.js --optionsFile=options_example.json | ./node_modules/.bin/bunyan",
     "postinstall": "cd public ; ../node_modules/.bin/bower install"
   },
   "dependencies": {
@@ -26,7 +26,7 @@
     "hat": "0.0.3",
     "heapdump": "^0.2.10",
     "js-base64": "^2.1.7",
-    "ldapjs": "^0.7.1",
+    "ldapjs-hotfix": "^0.7.1",
     "less-middleware": "1.0.x",
     "lodash": "^3.5.0",
     "minimist": "^1.1.1",

@@ -1,4 +1,4 @@
-var ldap = require('ldapjs');
+var ldap = require('ldapjs-hotfix');
 var assert = require('assert');
 var _ = require('lodash');
 var async = require('async');

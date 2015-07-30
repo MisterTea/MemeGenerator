@@ -44,7 +44,7 @@ exports.init = function() {
   app.use(bodyParser.json({limit: '128mb'}));
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(cookieParser());
-  app.use(require('less-middleware')(path.join(__dirname, '../public')));
+  //app.use(require('less-middleware')(path.join(__dirname, '../public')));
   app.use(express.static(path.join(__dirname, '../public'), {maxAge: 0}));
   app.use(session({
     secret: options.sessionSecret,
