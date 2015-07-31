@@ -20,7 +20,7 @@ var LDAPEntryToGroup = extractor.LDAPEntryToGroup;
 
 var fetchUsers = function(successCallback,errorCallback) {
   var client = ldap.createClient({
-    url: options['ldap']['server']
+    url: options.login.ldap.server
   });
 
   client.bind('', '', function(err) {
@@ -33,7 +33,7 @@ var fetchUsers = function(successCallback,errorCallback) {
     }
     var count=0;
     var users = [];
-    client.search(options['ldap']['userDN'],{
+    client.search(options.login.ldap.userDN,{
       scope:"one",
       attributes:extractor.LDAPUserAttributes,
       timeLimit:60*60
@@ -77,7 +77,7 @@ var fetchUsers = function(successCallback,errorCallback) {
 
 var fetchGroups = function(successCallback,errorCallback) {
   var client = ldap.createClient({
-    url: options['ldap']['server']
+    url: options.login.ldap.server
   });
 
   client.bind('', '', function(err) {
@@ -91,7 +91,7 @@ var fetchGroups = function(successCallback,errorCallback) {
     var count=0;
     var userGroupMap = {};
     var groupNames = [];
-    client.search(options['ldap']['groupDN'],{
+    client.search(options.login.ldap.groupDN,{
       scope:"one",
       attributes:extractor.LDAPGroupAttributes,
       timeLimit:60*60

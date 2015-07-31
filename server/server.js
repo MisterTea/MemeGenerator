@@ -28,7 +28,6 @@ require('./mongoose-handler').init(function() {
       passphrase:options.credentials.passphrase
     };
 
-    options.port = process.env.PORT || options.port || 8453;
     app.set('port', options.port);
     exports.server =
       https.createServer(credentials, app)
@@ -37,7 +36,6 @@ require('./mongoose-handler').init(function() {
         launchServer
       );
   } else {
-    options.port = process.env.PORT || options.port || 3010;
     app.set('port', options.port);
     exports.server =
       http.createServer(app)

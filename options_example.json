@@ -1,36 +1,50 @@
 {
-  "logging":{
-    "level":"debug",
-    "file":"./outputlog.json"
+  "logging": {
+    "level": "debug",
+    "file": ".\/outputlog.json"
   },
-  "database":{
-    "debug":true,
-    "uri":"mongodb://localhost/memegenerator"
+  "database": {
+    "debug": true,
+    "uri": "mongodb:\/\/localhost\/memegenerator"
   },
-  "elasticsearch":{
-    "enable":false,
-    "host":"localhost:9200",
-    "loglevel":"warning"
+  "elasticsearch": {
+    "enable": false,
+    "host": "localhost:9200",
+    "loglevel": "warning"
   },
-  "serverName":"Tidal Wave",
-  "auth":"plain",
-  "hostname":"memegenerator.com",
-  "port":null,
-  "email" : {
-    "serverEmailAddress":"memegenerator-mailer@memegenerator.com",
-    "transport":"direct",
-    "options":{}
+  "serverName": "Tidal Wave",
+  "hostname": "memegenerator.com",
+  "port": null,
+  "email": {
+    "serverEmailAddress": "memegenerator-mailer@memegenerator.com",
+    "transport": "direct",
+    "options": null
   },
-  "ldap":{
-    "server":"ldaps://myldapserver:636",
-    "userField":"uid",
-    "bindDN":"cn=users,dc=com"
+  "login": {
+    "auth": [
+      "facebook",
+      "google",
+      "plain"
+    ],
+    "facebook": {
+      "clientID": "INSERT_FACEBOOK_CLIENTID_HERE",
+      "clientSecret": "INSERT_FACEBOOK_SECRET_HERE"
+    },
+    "google": {
+      "clientID": "INSERT_GOOGLE_CLIENTID_HERE",
+      "clientSecret": "INSERT_GOOGLE_SECRET_HERE"
+    },
+    "ldap": {
+      "server": "ldaps:\/\/myldapserver:636",
+      "userField": "uid",
+      "bindDN": "cn=users,dc=com"
+    }
   },
-  "ssl":false,
-  "sessionSecret":"t1d4lw4ve",
+  "ssl": false,
+  "sessionSecret": "t1d4lw4ve",
   "credentials": {
-    "certificateFile":"mycert.pem",
-    "privateKeyFile":"keystore.pem",
-    "passphrase":"myPassphrase"
+    "certificateFile": "mycert.pem",
+    "privateKeyFile": "keystore.pem",
+    "passphrase": "myPassphrase"
   }
 }
