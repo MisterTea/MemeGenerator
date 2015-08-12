@@ -1,3 +1,6 @@
+var app = require('./app').app;
+var validator = require('../public/bower_components/validator-js/validator');
+
 app.directive('validateemail', function() {
   return {
     require: 'ngModel',

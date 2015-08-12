@@ -1,3 +1,5 @@
+var app = require('./app').app;
+
 app.service('globalState', ['$rootScope', 'retryHttp', function($rootScope, retryHttp) {
   var state = {
   };

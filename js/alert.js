@@ -1,3 +1,5 @@
+var app = require('./app').app;
+
 app.service('alertService', ['$rootScope', '$timeout', function($rootScope, $timeout) {
   var alerts = [];
   var getAlerts = function() {

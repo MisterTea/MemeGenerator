@@ -1,3 +1,5 @@
+var app = require('./app').app;
+
 app.service('retryHttp',['$http','$timeout','alertService',function(
   $http,$timeout,alertService) {
 

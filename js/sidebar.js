@@ -1,3 +1,5 @@
+var app = require('./app').app;
+
 app.controller('SideBarController', ['$scope', '$location', '$timeout', '$rootScope', '$log', 'retryHttp', function($scope, $location, $timeout, $rootScope, $log, retryHttp) {
   var updateNav = function() {
     var path = $location.path();

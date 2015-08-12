@@ -1,3 +1,5 @@
+var app = require('./app').app;
+
 app.service('dataCache', ['retryHttp', '$log', '$timeout', function(retryHttp, $log, $timeout) {
   var fetching = {};
   var cached = {};

@@ -1,3 +1,6 @@
+var app = require('./app').app;
+var $ = require('jquery');
+
 app.config(['$logProvider', function($logProvider){
     $logProvider.debugEnabled(true);
 }]);
@@ -32,4 +35,3 @@ app.factory('$exceptionHandler', function($log) {
         }});
     };
 });
-

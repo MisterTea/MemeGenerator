@@ -1,4 +1,9 @@
-var app = app;
+var app = require('./app').app;
+var async = require('async');
+var _ = require('lodash');
+var moment = require('moment');
+var Base64 = require('js-base64').Base64;
+var Autolinker = require('autolinker');
 
 app.filter('getMemeAllFramesImageUrl',function() {
   return function(meme) {

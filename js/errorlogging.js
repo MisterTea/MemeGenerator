@@ -1,3 +1,5 @@
+var $ = require('jquery');
+
 function logError(details) {
   $.ajax({
     type: 'POST',
@@ -12,11 +14,15 @@ function logError(details) {
 }
 
 window.onerror = function (errorMsg, url, lineNumber, column, errorObj) {
+  var stack = "";
+  if (errorObj && errorObj.stack) {
+    stack = errorObj.stack;
+  }
   logError({
     message:errorMsg,
     cause:null,
     context:navigator.userAgent,
-    stack:errorObj,
+    stack:stack,
     location : window.location,
     performance : window.performance
   });
