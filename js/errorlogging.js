@@ -7,8 +7,8 @@ function logError(details) {
     data: JSON.stringify(details),
     contentType: 'application/json; charset=utf-8',
     complete:function(jqXHR, textStatus) {
-      //alert("Sorry, there was a fatal error. Redirecting to the home page.");
-      //window.location.href = "/";
+      alert("Sorry, there was a fatal error. Redirecting to the home page.");
+      window.location.href = "/";
     }
   });
 }
