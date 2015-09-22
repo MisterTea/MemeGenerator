@@ -32,11 +32,13 @@ exports.init = function(app) {
     });
   });
 
-  if(options.login.auth.indexOf('facebook') > -1) {
+  if(options.login.auth.indexOf('facebook') > -1 &&
+    options.login.facebook.clientID != 'INSERT_FACEBOOK_CLIENTID_HERE') {
     enableFacebookStrategy(passport);
   }
 
-  if(options.login.auth.indexOf('google') > -1) {
+  if(options.login.auth.indexOf('google') > -1 &&
+    options.login.google.clientID != 'INSERT_GOOGLE_CLIENTID_HERE') {
     enableGoogleStrategy(passport);
   }
 
