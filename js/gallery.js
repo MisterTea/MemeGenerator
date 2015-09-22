@@ -4,6 +4,8 @@ var _ = require('lodash');
 var moment = require('moment');
 var Base64 = require('js-base64').Base64;
 var Autolinker = require('autolinker');
+require('filedrop');
+var FileDrop = window.FileDrop;
 
 app.filter('getMemeAllFramesImageUrl',function() {
   return function(meme) {
