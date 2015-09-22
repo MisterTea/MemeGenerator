@@ -175,7 +175,7 @@ exports.init = function(app) {
   //   redirecting the user to facebook.com.  After authorization, Facebook will
   //   redirect the user back to this application at /auth/facebook/callback
   app.get('/auth/facebook',
-          passport.authenticate('facebook'),
+          passport.authenticate('facebook', {scope: 'email'}),
           function(req, res){
             // The request will be redirected to Facebook for authentication, so this
             // function will not be called.
@@ -224,7 +224,7 @@ var enableFacebookStrategy = function(passport) {
   passport.use(new FacebookStrategy({
     clientID: options.login.facebook.clientID,
     clientSecret: options.login.facebook.clientSecret,
-    callbackURL: "http://localhost:"+options.port+"/auth/facebook/callback",
+    callbackURL: (options.ssl?"https":"http")+"://"+options.hostname+":"+options.port+"/auth/facebook/callback",
     profileFields: ['id', 'displayName', 'email'],
     enableProof: false
   }, function(accessToken, refreshToken, profile, done) {
@@ -259,7 +259,7 @@ var enableGoogleStrategy = function(passport) {
   passport.use(new GoogleStrategy({
     clientID: options.login.google.clientID,
     clientSecret: options.login.google.clientSecret,
-    callbackURL: "http://localhost:"+options.port+"/auth/google/callback"
+    callbackURL: (options.ssl?"https":"http")+"://"+options.hostname+":"+options.port+"/auth/google/callback"
   }, function(accessToken, refreshToken, profile, done) {
     log.info("GOOGLE PROFILE");
     log.info(profile);
