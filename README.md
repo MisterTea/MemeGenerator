@@ -1,6 +1,6 @@
 # MemeGenerator
 
-Share jokes with your team!  Visit http://ucfpawn.dyndns.info:3010/ for a demo
+Share jokes with your team!
 
 ## Requirements
 
