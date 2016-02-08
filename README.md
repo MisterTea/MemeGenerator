@@ -24,5 +24,5 @@ emacs options.json
 Then, execute this line to launch the server:
 
 ```
-node server/server.js --optionsFile=options_ucfpawn.json | ./node_modules/.bin/bunyan
+node server/server.js --optionsFile=options.json | ./node_modules/.bin/bunyan
 ```
